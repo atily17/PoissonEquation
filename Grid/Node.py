@@ -105,5 +105,6 @@ class Cartesian(Node):
          
     def print(self):
         np.set_printoptions(precision = 3)
+        print("-----Node-----")
         for i, nodes in enumerate(self.nodes):
             print("node"+str(i), nodes)

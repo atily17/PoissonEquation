@@ -54,3 +54,8 @@ class DensityFlux(object):
         cmap = plt.quiver(pointsx, pointsy, exs, eys, ee, alpha=.5, cmap = cm.hsv )
         fig.colorbar(cmap)
         plt.show()
+
+    def print(self):
+        print("-----FluxDensity-----")
+        for i in range(len(self.densityFlux)):
+            print(self.densityFlux[i])

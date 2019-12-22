@@ -1,4 +1,4 @@
-from .FDM import FDM
+from . import FDM
 
 class Solver(object):
     def __init__(self):

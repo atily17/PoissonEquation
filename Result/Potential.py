@@ -8,6 +8,7 @@ class Potential(object):
         self.potentials = [{ "potential":potentials[i], "point":nodes[i]["point"]} for i in range(len(nodes))]
 
     def print(self):
+        print("-----Potential-----")
         for i in range(len(self.potentials)):
             print(self.potentials[i])
 

@@ -1,10 +1,10 @@
 import numpy as np
 
 import time
-from Problem import Problem
-from Grid import Grid
-from Solver import Solver
-from Result import Result
+import Problem
+import Grid
+import Solver
+import Result
 
 class PoissonEquation:
     def __init__(self, domain, source):
@@ -24,20 +24,30 @@ class PoissonEquation:
         self.result = Result.Result(self.solution, self.grid, self.problem)
         self.result.calcDensityFlux()
 
-    def plot(self, type):
-        if type == "domain":
+    def plot(self, plotType = "all"):
+        if plotType == "all" or plotType == "Domain":
             self.problem.domain.plot()
-        elif type == "grid":
+        if plotType == "all" or plotType == "Grid":
             self.grid.plot()
-        elif type == "Potential":
+        if plotType == "all" or plotType == "Potential":
             self.result.plot("Potential")
-        elif type == "DensityFlux":
+        if plotType == "all" or plotType == "DensityFlux":
             self.result.plot("DensityFlux")
 
-    def print(self, type):
-        if type == "problem":
+    def print(self, printType = "all"):
+        if printType == "all" or printType == "Problem":
             self.problem.print()
-    
+        if printType == "all" or printType == "Grid":
+            self.grid.print()
+        if printType == "all" or printType == "result":
+            self.result.print()
+
+        if printType == "Domain" or printType == "Source":
+            self.problem.print(printType)
+        elif printType == "Node":
+            self.grid.print(printType)
+        elif printType == "Potential" or printType == "FluxDensity":
+            self.grid.print(printType)
 
 if __name__ == "__main__":
     domain = {"shape":"Polygon",
@@ -77,3 +87,5 @@ if __name__ == "__main__":
     poisson.result()
     poisson.plot("Potential")
     poisson.plot("DensityFlux")
+
+    poisson.print()

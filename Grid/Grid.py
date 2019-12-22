@@ -14,6 +14,11 @@ class Grid(object):
             self.node.sort()
             self.node.setNextNo()
 
+    def print(self, gridType = "all"):
+        print("-----Grid-----")
+        if gridType == "all" or gridType == "Node":
+            self.node.print()
+
     def plot(self, sizeRate=10):
         size = np.array([self.problem.domain.right-self.problem.domain.left, self.problem.domain.up-self.problem.domain.down])
         size_normalize=size[0]+size[1]

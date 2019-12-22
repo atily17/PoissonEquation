@@ -134,10 +134,7 @@ class MatrixGenerater(object):
 
             mtrix = np.array([row1, row2, row3, row4, row5])
             normalVec = [normalVec[0], normalVec[1], 0, 0, 0]
-            print(mtrix)
-            print(normalVec)
             ans = np.linalg.solve(mtrix, normalVec)
-            print(ans)
             self.matrix[i][i] = - ans[0] - ans[1] - ans[2]
             self.matrix[i][p1] = ans[0]
             self.matrix[i][p2] = ans[1]

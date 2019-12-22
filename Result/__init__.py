@@ -1,1 +1,1 @@
-﻿
+﻿from .Result import Result

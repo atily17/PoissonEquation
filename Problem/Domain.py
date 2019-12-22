@@ -7,25 +7,26 @@ class Domain(object):
         self.shape = shape
         self.bc = bc
 
-        print("-----Domain-----")
-        print("shape:",self.shape)
-        print("Boundary Condition:",self.bc)
-
     def setRange(self, left, right, down, up):
         self.left = left
         self.right = right
         self.down = down
         self.up = up
-        print("range:", self.left, self.right, self.down, self.up)
 
+    def print(self):
+        print("-----Domain-----")
+        print("#shape")
+        print(self.shape)
+        print("#Boundary Condition")
+        print(self.bc)
+        print("#range")
+        print(self.left, self.right, self.down, self.up)
 
 class Polygon(Domain):
     def __init__(self, vertexes, bc):
         super().__init__("Polygon", bc)
         self.nVertexes = len(vertexes)
         self.vertexes = np.array(vertexes)
-        print("n_vertexes", self.nVertexes)
-        print("vertexes", self.vertexes)
 
     def calcRange(self):
         l = np.amin(self.vertexes[:,0])
@@ -118,6 +119,11 @@ class Polygon(Domain):
       
         for i in inx:
             node[i]["position"]="in"
+
+    def print(self):
+        super().print()
+        print("n_vertexes", self.nVertexes)
+        print("vertexes", self.vertexes)
 
     def plot(self, sizeRate=10):
         size = np.array([self.right - self.left, self.up - self.down])

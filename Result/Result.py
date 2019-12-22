@@ -14,12 +14,15 @@ class Result(object):
             self.densityFlux = DensityFlux.DensityFlux(self.grid)
             self.densityFlux.calcDensityFlux(self.potentials.potentials)
 
-    def print(self):
-        self.potentials.print()
+    def print(self, valueType = "all"):
+        print("-----Result-----")
+        if valueType == "all" or valueType == "Potential":
+            self.potentials.print()
+        if valueType == "all" or valueType == "DensityFlux":
+            self.densityFlux.print()
 
-    def plot(self, quantity):
-        if quantity == "Potential":
+    def plot(self, valueType = "all"):
+        if valueType == "all" or valueType == "Potential":
             self.potentials.plot(self.problem)
-            self.print()
-        if quantity == "DensityFlux":
+        if valueType == "all" or valueType == "DensityFlux":
             self.densityFlux.plot(self.problem)
