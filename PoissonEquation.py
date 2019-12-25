@@ -1,16 +1,16 @@
+import time
 import numpy as np
 
-import time
+
 import Problem
 import Grid
 import Solver
 import Result
+import IOData
 
 class PoissonEquation:
-    def __init__(self, domain, source):
-        self.problem = Problem.Problem()
-        self.problem.setDomain(**domain)
-        self.problem.setSource(**source)
+    def __init__(self, problem):
+        self.problem = Problem.Problem(problem)
 
     def generateGrid(self, grid, mode="All"):
         self.grid = Grid.Grid(self.problem, **grid)
@@ -22,7 +22,7 @@ class PoissonEquation:
 
     def result(self):
         self.result = Result.Result(self.solution, self.grid, self.problem)
-        self.result.calcDensityFlux()
+        self.result.calcFluxDensity()
 
     def plot(self, plotType = "all"):
         if plotType == "all" or plotType == "Domain":
@@ -31,8 +31,8 @@ class PoissonEquation:
             self.grid.plot()
         if plotType == "all" or plotType == "Potential":
             self.result.plot("Potential")
-        if plotType == "all" or plotType == "DensityFlux":
-            self.result.plot("DensityFlux")
+        if plotType == "all" or plotType == "FluxDensity":
+            self.result.plot("FluxDensity")
 
     def print(self, printType = "all"):
         if printType == "all" or printType == "Problem":
@@ -50,25 +50,18 @@ class PoissonEquation:
             self.grid.print(printType)
 
 if __name__ == "__main__":
-    domain = {"shape":"Polygon",
-              "vertexes":[[-1,-1],[1,-1], [0.4,1],[-0.4,1]],
-              "bc":{
-                  "bc": [
-                      {"bctype":"Dirichlet", "constant":-1}, 
-                      {"bctype":"Neumann", "constant":0},
-                      {"bctype":"Dirichlet", "constant":1},
-                      {"bctype":"Neumann", "constant":0}
-                      ], 
-                  "priority":[0,2,1,3]
-                  }
-              }
-    source = {"source": 0}
-    grid = {"type":"Cartesian", "div":[25,25]}
+    filename = "./Example/Problem1.json"
+    problem = IOData.InputData().readProblemData(filename)
+
+    #if put charge(=-5) on center
+    #problem["source"] = lambda x: (-4 if ((-0.2 < x[0] < 0.2) and (-0.2 < x[1] < 0.2)) else 0)
+
+    grid = {"type":"Cartesian", "div":[30,30]}
     method = "FDM"
 
     print("Problem")
     t1 = time.time()
-    poisson = PoissonEquation(domain,source)
+    poisson = PoissonEquation(problem)
     t2 = time.time()
     print(t2 - t1)
 
@@ -77,6 +70,7 @@ if __name__ == "__main__":
     poisson.generateGrid(grid, "Node")
     t2 = time.time()
     print(t2 - t1)
+    poisson.plot("Grid")
 
     print("solve")
     t1 = time.time()
@@ -86,6 +80,8 @@ if __name__ == "__main__":
 
     poisson.result()
     poisson.plot("Potential")
-    poisson.plot("DensityFlux")
+    poisson.plot("FluxDensity")
 
-    poisson.print()
+    #poisson.print()
+    filename = "./potential.json"
+    IOData.OutputData().writeFluxDensity(poisson.result.fluxDensity.fluxDensity, filename)

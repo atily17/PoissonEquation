@@ -120,6 +120,65 @@ class Polygon(Domain):
         for i in inx:
             node[i]["position"]="in"
 
+    def isNextNodeNearBorder(self, node0, node1):
+        pos0 = node0["position"]
+        pos1 = node1["position"]
+        if pos0 == pos1:
+            return False
+        postype0 = node0["position"][0]
+        postype1 = node1["position"][0]
+        posnum0 = int(node0["position"][1:])
+        posnum1 = int(node1["position"][1:])
+        if ((postype0 == "c") and (postype1 == "c") and 
+            ((posnum1 - posnum0)%self.nVertexes == 1 or ((posnum1 - posnum0)%self.nVertexes == self.nVertexes - 1))
+           ):
+            return False
+        if ((postype0 == "b") and (postype1 == "c") and 
+            ((posnum0 == posnum1) or (posnum0 == (posnum1 - 1)%self.nVertexes))
+           ):
+            return False
+        if ((postype0 == "c") and (postype1 == "b") and 
+            ((posnum0 == posnum1) or (posnum0 == (posnum1 + 1)%self.nVertexes))
+           ):
+            return False
+
+        pm = (node0["point"] + node1["point"])/2
+        if postype0 == "b":
+            vp0 = self.vertexes[posnum0]
+            vp1 = self.vertexes[(posnum0 + 1)%self.nVertexes]
+            vVec = vp1 - vp0
+            pVec = pm - vp0
+            b0 = (vVec[0] * pVec[1] - vVec[1] * pVec[0]) > 0
+        else:
+            vp0 = self.vertexes[posnum0]
+            vp1 = self.vertexes[(posnum0 + 1)%self.nVertexes]
+            vp2 = self.vertexes[(posnum0 - 1)%self.nVertexes]
+            vVec1 = vp1 - vp0
+            vVec2 = vp0 - vp2
+            pVec1 = pm - vp0
+            pVec2 = pm - vp2
+            b0  = (vVec1[0] * pVec1[1] - vVec1[1] * pVec1[0]) > 0
+            b0 &= (vVec2[0] * pVec2[1] - vVec2[1] * pVec2[0]) > 0
+
+        if postype1 == "b":
+            vp0 = self.vertexes[posnum1]
+            vp1 = self.vertexes[(posnum1 + 1)%self.nVertexes]
+            vVec = vp1 - vp0
+            pVec = pm - vp0
+            b1 = (vVec[0] * pVec[1] - vVec[1] * pVec[0]) > 0
+        else:
+            vp0 = self.vertexes[ posnum1]
+            vp1 = self.vertexes[(posnum1 + 1)%self.nVertexes]
+            vp2 = self.vertexes[(posnum1 - 1)%self.nVertexes]
+            vVec1 = vp1 - vp0
+            vVec2 = vp0 - vp2
+            pVec1 = pm - vp0
+            pVec2 = pm - vp2
+            b1  = (vVec1[0] * pVec1[1] - vVec1[1] * pVec1[0]) > 0
+            b1 &= (vVec2[0] * pVec2[1] - vVec2[1] * pVec2[0]) > 0
+
+        return b0&b1
+
     def print(self):
         super().print()
         print("n_vertexes", self.nVertexes)

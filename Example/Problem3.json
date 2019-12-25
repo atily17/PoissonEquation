@@ -1,0 +1,38 @@
+{
+  "domain": {
+    "shape": "Polygon",
+    "vertexes": [
+      [ -1, -1 ],
+      [ 1, -1 ],
+      [ -0.8, 0 ],
+      [ 1, 1 ],
+      [ -1, 1 ]
+    ],
+    "bc": {
+      "bc": [
+        {
+          "bctype": "Dirichlet",
+          "constant": -1
+        },
+        {
+          "bctype": "Neumann",
+          "constant": 0
+        },
+        {
+          "bctype": "Neumann",
+          "constant": 0
+        },
+        {
+          "bctype": "Dirichlet",
+          "constant": 1
+        },
+        {
+          "bctype": "Neumann",
+          "constant": 0
+        }
+      ],
+      "priority": [ 0, 3, 1, 2, 4 ]
+    }
+  },
+  "source": 0
+}

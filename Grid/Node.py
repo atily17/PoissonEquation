@@ -12,7 +12,7 @@ class Node(object):
 
 
 class Cartesian(Node):
-    def __init__(self, domain, div, epsilon = 4):
+    def __init__(self, domain, div, epsilon = 3):
         self.domain = domain
         if isinstance(div[0], (int)):
             self.nDivX = div[0]
@@ -49,7 +49,9 @@ class Cartesian(Node):
         deleteindex = []
         indexes = np.where(pos[:] == "c")[0]
         for ix in indexes:
-            pb = np.where((np.abs(pts[:,0] - pts[ix,0]) < self.eps[0] ) & (np.abs(pts[:,1] - pts[ix,1]) < self.eps[1] ) & (pos[:] != "c"))[0]
+            if np.any(ix == deleteindex):
+                continue
+            pb = np.where(np.isclose(np.abs(pts[:,0] - pts[ix,0]),0 ) & np.isclose(np.abs(pts[:,1] - pts[ix,1]), 0 ) & (pos[:] != "c"))[0]
             deleteindex.extend(pb)
         self.nodes = [self.nodes[i] for i in range(len(self.nodes)) if i not in deleteindex]
 
@@ -63,7 +65,23 @@ class Cartesian(Node):
         for ix in indexes:
             if np.any(ix == deleteindex):
                 continue
-            pb = np.where((np.abs(pts[:,0] - pts[ix,0]) < self.eps[0] ) & (np.abs(pts[:,1] - pts[ix,1]) < self.eps[1] ) & (ii[:] != ix))[0]
+            fi = np.ones(len(pts), dtype=bool)
+            fi[ix]=False
+            pb = np.where((np.isclose(np.abs(pts[:,0] - pts[ix,0]) ,0 )) & ( np.isclose(np.abs(pts[:,1] - pts[ix,1]), 0 )) & (pos[:] == "b") & (fi))[0]
+            deleteindex.extend(pb)
+        self.nodes = [self.nodes[i] for i in range(len(self.nodes)) if i not in deleteindex]
+
+        # Delete overlap nodes on Borders
+        pos = np.array([self.nodes[i]["position"][0] for i in range(len(self.nodes))] , dtype=str)
+        posf = np.array([self.nodes[i]["position"] for i in range(len(self.nodes))] , dtype=str)
+        pts = np.array([self.nodes[i]["point"] for i in range(len(self.nodes))])
+        ii = np.arange(len(pts))
+        deleteindex = []
+        indexes = np.where((pos[:] == "b") | (pos[:] == "c"))[0]
+        for ix in indexes:
+            #if np.any(ix == deleteindex):
+            #    continue
+            pb = np.where((np.abs(pts[:,0] - pts[ix,0]) < self.eps[0] ) & (np.abs(pts[:,1] - pts[ix,1]) < self.eps[1] ) & (pos[:] != "b") & (pos[:] != "c"))[0]
             deleteindex.extend(pb)
         self.nodes = [self.nodes[i] for i in range(len(self.nodes)) if i not in deleteindex]
 
@@ -82,25 +100,49 @@ class Cartesian(Node):
         self.domain.getNextNode(self.nodes)
         
         # another
-        pt  = np.array([node["point"] for node in self.nodes])
-        for x in self.xs:
+        pt = np.array([node["point"] for node in self.nodes])
+        ptX  = np.round(np.array([node["point"][0] for node in self.nodes]), 8)
+        ptX = np.unique(ptX)
+        for x in ptX:
            x_index = np.where(np.isclose(pt[:,0], x))[0]
            for x_index_i in range(len(x_index)):
-               nn = self.nodes[x_index[x_index_i]]["nextnode"]
-               nnl = [nn[n]["no"] for n in range(len(nn))]
-               if (x_index_i != 0) and (np.all(nnl != x_index[x_index_i-1])):
+               if (
+                    x_index_i != 0 and 
+                    (
+                        (self.nodes[x_index[x_index_i]]["position"] == "in" or self.nodes[x_index[x_index_i-1]]["position"] == "in") or
+                        self.domain.isNextNodeNearBorder(self.nodes[x_index[x_index_i]], self.nodes[x_index[x_index_i - 1]])
+                    )
+                  ):
                    self.nodes[x_index[x_index_i]]["nextnode"].append({"no": x_index[x_index_i - 1], "position": "d" } )
-               if (x_index_i != len(x_index)-1) and (np.all(nnl != x_index[x_index_i+1])):
+               if (
+                    (x_index_i != len(x_index)-1) and 
+                    (
+                        (self.nodes[x_index[x_index_i]]["position"] == "in" or self.nodes[x_index[x_index_i+1]]["position"] == "in") or
+                        self.domain.isNextNodeNearBorder(self.nodes[x_index[x_index_i]], self.nodes[x_index[x_index_i + 1]])
+                    )
+                   ):
                    self.nodes[x_index[x_index_i]]["nextnode"].append({"no": x_index[x_index_i + 1], "position": "u" } )
 
-        for y in self.ys:
+        ptY  = np.round(np.array([node["point"][1] for node in self.nodes]), 8)
+        ptY = np.unique(ptY)
+        for y in ptY:
            y_index = np.where(np.isclose(pt[:,1], y))[0]
            for y_index_i in range(len(y_index)):
-               nn = self.nodes[y_index[y_index_i]]["nextnode"]
-               nnl = [nn[n]["no"] for n in range(len(nn))]
-               if (y_index_i != 0) and (np.all(nnl != y_index[y_index_i-1])):
+               if (
+                    (y_index_i != 0) and 
+                    (
+                        (self.nodes[y_index[y_index_i]]["position"] == "in" or self.nodes[y_index[y_index_i-1]]["position"] == "in") or
+                        self.domain.isNextNodeNearBorder(self.nodes[y_index[y_index_i]], self.nodes[y_index[y_index_i - 1]])
+                    )
+                  ):
                    self.nodes[y_index[y_index_i]]["nextnode"].append({"no": y_index[y_index_i - 1], "position": "l" } )
-               if (y_index_i != len(y_index)-1) and (np.all(nnl != y_index[y_index_i+1])):
+               if (
+                    (y_index_i != len(y_index)-1) and 
+                    (
+                        (self.nodes[y_index[y_index_i]]["position"] == "in" or self.nodes[y_index[y_index_i+1]]["position"] == "in") or
+                        self.domain.isNextNodeNearBorder(self.nodes[y_index[y_index_i]], self.nodes[y_index[y_index_i + 1]])
+                    )
+                  ):
                    self.nodes[y_index[y_index_i]]["nextnode"].append({"no": y_index[y_index_i + 1], "position": "r" } )
          
     def print(self):

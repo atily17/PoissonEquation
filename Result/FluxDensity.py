@@ -2,12 +2,12 @@ import numpy as np
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 
-class DensityFlux(object):
+class FluxDensity(object):
     def __init__(self, grid):
         self.grid = grid
 
-    def calcDensityFlux(self, potentials):
-        self.densityFlux = []
+    def calcFluxDensity(self, potentials):
+        self.fluxDensity = []
 
         nodes = [ node for node in self.grid.node.nodes]
         point = [ nodes[i]["point"] for i in range(len(nodes)) ]
@@ -32,7 +32,7 @@ class DensityFlux(object):
 
             ex = -1/(2*(dxl+dxr))*(ptntl[r_index] - ptntl[l_index])
             ey = -1/(2*(dxd+dxu))*(ptntl[u_index] - ptntl[d_index])
-            self.densityFlux.append({"Dx":ex, "Dy":ey, "point":point[i] })
+            self.fluxDensity.append({"Dx":ex, "Dy":ey, "intensity": np.sqrt(ex**2 + ey**2) , "point":point[i] })
 
     def plot(self, problem, sizeRate=10):
         size = np.array([problem.domain.right-problem.domain.left, problem.domain.up-problem.domain.down])
@@ -45,11 +45,11 @@ class DensityFlux(object):
         ax =fig.add_subplot(1,1,1)
         domain = plt.Polygon(problem.domain.vertexes, zorder=1, fc = "#CCCCFF", ec = "#CCCCFF")
 
-        pointsx = [df["point"][0] for df in self.densityFlux ]
-        pointsy = [df["point"][1] for df in self.densityFlux ]
-        exs     = [df["Dx"] for df in self.densityFlux ]
-        eys     = [df["Dy"] for df in self.densityFlux ]
-        ee      = [np.sqrt(df["Dx"]**2 + df["Dy"]**2) for df in self.densityFlux ]
+        pointsx = [df["point"][0] for df in self.fluxDensity ]
+        pointsy = [df["point"][1] for df in self.fluxDensity ]
+        exs     = [df["Dx"] for df in self.fluxDensity ]
+        eys     = [df["Dy"] for df in self.fluxDensity ]
+        ee      = [np.sqrt(df["intensity"]) for df in self.fluxDensity ]
 
         cmap = plt.quiver(pointsx, pointsy, exs, eys, ee, alpha=.5, cmap = cm.hsv )
         fig.colorbar(cmap)
@@ -57,5 +57,5 @@ class DensityFlux(object):
 
     def print(self):
         print("-----FluxDensity-----")
-        for i in range(len(self.densityFlux)):
-            print(self.densityFlux[i])
+        for i in range(len(self.fluxDensity)):
+            print(self.fluxDensity[i])

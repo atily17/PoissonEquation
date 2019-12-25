@@ -36,6 +36,8 @@ class MatrixGenerater(object):
             self.matrix[i][d_index] = 2 * (1 / (dxd + dxu)) * (1 / dxd)
             self.matrix[i][u_index] = 2 * (1 / (dxd + dxu)) * (1 / dxu)
             self.matrix[i][i] = - (self.matrix[i][l_index] + self.matrix[i][r_index] + self.matrix[i][d_index] + self.matrix[i][u_index])
+        np.set_printoptions(precision = 2, threshold = 10000, linewidth = 10000)
+        print(self.matrix)
         return self.matrix
 
     def border(self, i):
@@ -78,52 +80,65 @@ class MatrixGenerater(object):
         nextNodeVec = nextNodePoint - self.nodes[i]["point"]
         nextNodePos = [nN["position"] for nN in nextNode ]
         # 内積と外積
-        dot = nextNodePoint[:,0] * normalVec[0] + nextNodePoint[:,1] * normalVec[1]
-        cross = normalVec[0] * nextNodePoint[:,1] - normalVec[1] * nextNodePoint[:,0]
+        dot = nextNodeVec[:,0] * normalVec[0] + nextNodeVec[:,1] * normalVec[1]
+        cross = normalVec[0] * nextNodeVec[:,1] - normalVec[1] * nextNodeVec[:,0]
 
-        # 境界が垂直のとき
-        iszero = np.isclose(cross, 0)
-        if np.any(iszero):
-            ind = np.where(iszero)[0][0]
-            pos = nextNode[ind]["position"]
-            num = nextNode[ind]["no"]
-            delta = self.nodes[num]["point"] - self.nodes[i]["point"]
-            if pos == "l":
-                self.matrix[i][i] = 1 / delta[0]
-                self.matrix[i][num] = -1 / delta[0]
-            elif pos == "d":
-                self.matrix[i][i] = 1 / delta[1]
-                self.matrix[i][num] = -1 / delta[1]
-            elif pos == "r" :
-                self.matrix[i][i] = -1 / delta[0]
-                self.matrix[i][num] = 1 / delta[0]
-            elif pos == "u":
-                self.matrix[i][i] = -1 / delta[1]
-                self.matrix[i][num] = 1 / delta[1]
-            else:
-                assert(1)
-            return
-        
         # cornerのとき
         if self.nodes[i]["position"][0] == "c":
-            mtrix = np.array([nextNodeVec[nextNodePos.index("b")], nextNodeVec.index("f")]).T
+            p0 = self.domain.vertexes[ int(self.nodes[i]["position"][1:])]
+            p1 = self.domain.vertexes[(int(self.nodes[i]["position"][1:]) + 1) % self.domain.nVertexes]
+            p2 = self.domain.vertexes[(int(self.nodes[i]["position"][1:]) - 1) % self.domain.nVertexes]
+            vec1 = (p1 - p0) / np.linalg.norm(p1 - p0, ord=2)
+            vec2 = (p0 - p2) / np.linalg.norm(p2 - p0, ord=2)
+            normalVec1 = np.dot(np.array([[0, -1],[1, 0]]), vec1)
+            normalVec2 = np.dot(np.array([[0, -1],[1, 0]]), vec2)
+            normalVec = (np.linalg.norm(normalVec2)*normalVec1 + np.linalg.norm(normalVec1)*normalVec2 )
+            normalVec /= (np.linalg.norm(normalVec1) + np.linalg.norm(normalVec2))
+            normalVec /= np.linalg.norm(normalVec, ord=2)
+
+        if self.nodes[i]["position"][0] == "c" and len(nextNode) == 2:
+            backNum = nextNodePos.index("b")
+            fwrdNum = nextNodePos.index("f")
+            backIndex = nextNode[backNum]["no"]
+            fwrdIndex = nextNode[fwrdNum]["no"]
+            mtrix = np.array([nextNodeVec[backNum], nextNodeVec[fwrdNum]]).T
             ans = np.linalg.solve(mtrix, normalVec)
             self.matrix[i][i] = - ans[0] - ans[1]
-            self.matrix[i][minusNode] = ans[0]
-            self.matrix[i][plusNode]  = ans[1]
+            self.matrix[i][backIndex] = ans[0]
+            self.matrix[i][fwrdIndex]  = ans[1]
 
         # borderのとき
-        elif self.nodes[i]["position"][0] == "b":
+        elif len(nextNode) > 2:
             temp = nextNodePos[:]
             temp.remove("b")
             temp.remove("f")
             tt = temp[0]
-            x1 = nextNodeVec[nextNodePos.index("b")]
-            x2 = nextNodeVec[nextNodePos.index("f")]
-            x3 = nextNodeVec[nextNodePos.index(tt)]
 
-            p1 = nextNode[nextNodePos.index("b")]["no"]
-            p2 = nextNode[nextNodePos.index("f")]["no"]
+            i1 = nextNodePos.index("b")
+            p1 = nextNode[i1]["no"]
+            x1 = nextNodeVec[i1]
+            if np.linalg.norm(x1) < (np.linalg.norm(np.array(self.eps))):
+                nnextbNode = self.nodes[p1]["nextnode"]
+                nnextbNodePos = [nnextbNode[j]["position"] for j in range(len(nnextbNode))]
+                nnextbNodePoint = np.array([self.nodes[nnextbNode[j]["no"]]["point"] for j in range(len(nnextbNode))])
+                nnextbNodeVec = nnextbNodePoint - self.nodes[i]["point"]
+                i1 = nnextbNodePos.index("b")
+                p1 = nnextbNode[i1]["no"]
+                x1 = nnextbNodeVec[i1]
+            
+            i2 = nextNodePos.index("f")
+            p2 = nextNode[i2]["no"]
+            x2 = nextNodeVec[i2]
+            if np.linalg.norm(x2) < (np.linalg.norm(np.array(self.eps))):
+                nnextfNode = self.nodes[p2]["nextnode"]
+                nnextfNodePos = [nnextfNode[j]["position"] for j in range(len(nnextfNode))]
+                nnextfNodePoint = np.array([self.nodes[nnextfNode[j]["no"]]["point"] for j in range(len(nnextfNode))])
+                nnextfNodeVec = nnextfNodePoint - self.nodes[i]["point"]
+                i2 = nnextfNodePos.index("f")
+                p2 = nnextfNode[i2]["no"]
+                x2 = nnextfNodeVec[i2]
+
+            x3 = nextNodeVec[nextNodePos.index(tt)]
             p3 = nextNode[nextNodePos.index(tt )]["no"]
 
             row1 = [x1[0], x2[0], x3[0], 0, 0]

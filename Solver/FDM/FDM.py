@@ -10,4 +10,13 @@ class FDM(object):
         matrix = MatrixGenerater.MatrixGenerater().generate(problem, grid,"CartesianGrid")
         vector = VectorGenerater.VectorGenerater().generate(problem, grid)
 
+
+        #for i in range(len(vector)):
+        #    print(vector[i])
+        #x = matrix != 0
+        #for i in range(len(matrix)):
+        #    print(matrix[i])
+        #    print(x[i])
+
+
         return np.linalg.solve(matrix, vector)
