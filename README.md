@@ -59,3 +59,19 @@ To set the question, you can refer to json file in `Example` directory like foll
         - `priority`: Priority boundary at vertexes of the boundary condition.
 - `source`: The source term, which is f of above equation. This supports function type (for example, `lambda x: (np.sin(x[0]))*(np.sin(x[1]))`). However, because a json file cannot read function type, it write on PoissonEquation.py like problem["source"] = *function*.
 
+# Example
+
+### Trapezoid
+![image](./Example/ResultImage/Trapezoid(Potential).png)
+
+![image](./Example/ResultImage/Trapezoid(FluxDensity).png)
+
+### U-turn
+![image](./Example/ResultImage/U-turn(Potential).png)
+
+![image](./Example/ResultImage/U-turn(FluxDensity).png)
+
+### Source on Center
+![image](./Example/ResultImage/CenterSource(Potential).png)
+
+![image](./Example/ResultImage/CenterSource(FluxDensity).png)
