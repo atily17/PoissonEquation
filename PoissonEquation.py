@@ -49,14 +49,24 @@ class PoissonEquation:
         elif printType == "Potential" or printType == "FluxDensity":
             self.grid.print(printType)
 
+
+def dipole(x):
+        z = 0
+        if ((-0.1 < x[0] < 0) and (-0.1 < x[1] < 0)):
+            z = 1
+        elif ((0 < x[0] < 0.1) and (0 < x[1] < 0.1)):
+            z = -1
+        return z
+
 if __name__ == "__main__":
     filename = "./Example/Problem1.json"
     problem = IOData.InputData().readProblemData(filename)
 
     #if put charge(=-5) on center
-    #problem["source"] = lambda x: (-4 if ((-0.2 < x[0] < 0.2) and (-0.2 < x[1] < 0.2)) else 0)
+    #problem["source"] = lambda x: (-10 if ((-0.2 < x[0] < 0.2) and (-0.2 < x[1] < 0.2)) else 0)
+    problem["source"] = dipole
 
-    grid = {"type":"Cartesian", "div":[30,30]}
+    grid = {"type":"Cartesian", "div":[100,100]}
     method = "FDM"
 
     print("Problem")
