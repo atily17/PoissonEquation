@@ -57,7 +57,8 @@ To set the question, you can refer to json file in `Example` directory like foll
             - `bctype`: `Direchlet` or `Neumann`
             - `constant`: The right-hand side of boundary condition. This supports only a constant function.
         - `priority`: Priority boundary at vertexes of the boundary condition.
-- `source`: The source term, which is f of above equation. This supports function type (for example, `lambda x: (np.sin(x[0]))*(np.sin(x[1]))`). However, because a json file cannot read function type, it write on PoissonEquation.py like problem["source"] = *function*.
+- `source`:  
+The source term, which is f of above equation. This supports function type (for example, `lambda x: (np.sin(x[0]))*(np.sin(x[1]))`). However, because a json file cannot read function type, it write on PoissonEquation.py like problem["source"] = *function*.
 
 # Example
 
