@@ -16,19 +16,17 @@ class FluxDensity(object):
         for i in range(len(nodes)):
             if nodes[i]["position"] != "in":
                 continue
-            for nextnode in nodes[i]["nextnode"]:
-                if nextnode["position"] == "l":
-                    l_index = nextnode["no"]
-                    dxl = nodes[i]["point"][0] - nodes[l_index]["point"][0]
-                elif nextnode["position"] == "r":
-                    r_index = nextnode["no"]
-                    dxr = nodes[r_index]["point"][0] - nodes[i]["point"][0]
-                elif nextnode["position"] == "d":
-                    d_index = nextnode["no"]
-                    dxd = nodes[i]["point"][1] - nodes[d_index]["point"][1]
-                elif nextnode["position"] == "u":
-                    u_index = nextnode["no"]
-                    dxu = nodes[u_index]["point"][1] - nodes[i]["point"][1]
+            l_index = nodes[i]["nextnode"]["l"]
+            dxl = nodes[i]["point"][0] - nodes[l_index]["point"][0]
+            
+            r_index = nodes[i]["nextnode"]["r"]
+            dxr = nodes[r_index]["point"][0] - nodes[i]["point"][0]
+            
+            d_index = nodes[i]["nextnode"]["d"]
+            dxd = nodes[i]["point"][1] - nodes[d_index]["point"][1]
+            
+            u_index = nodes[i]["nextnode"]["u"]
+            dxu = nodes[u_index]["point"][1] - nodes[i]["point"][1]
 
             ex = -1/(2*(dxl+dxr))*(ptntl[r_index] - ptntl[l_index])
             ey = -1/(2*(dxd+dxu))*(ptntl[u_index] - ptntl[d_index])

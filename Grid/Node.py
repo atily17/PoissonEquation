@@ -32,7 +32,7 @@ class Cartesian(Node):
             self.ys = np.sort(self.ys)
             d = (self.domain.up - self.domain.down) / (self.ys[-1] - self.ys[0])
             self.ys = d * self.ys
-        self.nodes = [{"point":np.array([self.xs[i],self.ys[j]]), "position":"nd", "nextnode":[] } 
+        self.nodes = [{"point":np.array([self.xs[i],self.ys[j]]), "position":"nd", "nextnode":{} } 
                     for i,j in itertools.product(range(self.nDivX), range(self.nDivY))]
         epsx = (self.domain.right - self.domain.left)/self.nDivX/epsilon
         epsy = (self.domain.up - self.domain.down)/self.nDivY/epsilon
@@ -113,7 +113,7 @@ class Cartesian(Node):
                         self.domain.isNextNodeNearBorder(self.nodes[x_index[x_index_i]], self.nodes[x_index[x_index_i - 1]])
                     )
                   ):
-                   self.nodes[x_index[x_index_i]]["nextnode"].append({"no": x_index[x_index_i - 1], "position": "d" } )
+                   self.nodes[x_index[x_index_i]]["nextnode"]["d"] = x_index[x_index_i - 1]
                if (
                     (x_index_i != len(x_index)-1) and 
                     (
@@ -121,7 +121,7 @@ class Cartesian(Node):
                         self.domain.isNextNodeNearBorder(self.nodes[x_index[x_index_i]], self.nodes[x_index[x_index_i + 1]])
                     )
                    ):
-                   self.nodes[x_index[x_index_i]]["nextnode"].append({"no": x_index[x_index_i + 1], "position": "u" } )
+                   self.nodes[x_index[x_index_i]]["nextnode"]["u"] = x_index[x_index_i + 1]
 
         ptY  = np.round(np.array([node["point"][1] for node in self.nodes]), 8)
         ptY = np.unique(ptY)
@@ -135,7 +135,7 @@ class Cartesian(Node):
                         self.domain.isNextNodeNearBorder(self.nodes[y_index[y_index_i]], self.nodes[y_index[y_index_i - 1]])
                     )
                   ):
-                   self.nodes[y_index[y_index_i]]["nextnode"].append({"no": y_index[y_index_i - 1], "position": "l" } )
+                   self.nodes[y_index[y_index_i]]["nextnode"]["l"] = y_index[y_index_i - 1]
                if (
                     (y_index_i != len(y_index)-1) and 
                     (
@@ -143,7 +143,7 @@ class Cartesian(Node):
                         self.domain.isNextNodeNearBorder(self.nodes[y_index[y_index_i]], self.nodes[y_index[y_index_i + 1]])
                     )
                   ):
-                   self.nodes[y_index[y_index_i]]["nextnode"].append({"no": y_index[y_index_i + 1], "position": "r" } )
+                   self.nodes[y_index[y_index_i]]["nextnode"]["r"] = y_index[y_index_i + 1]
          
     def print(self):
         np.set_printoptions(precision = 3)

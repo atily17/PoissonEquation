@@ -13,7 +13,11 @@ class PoissonEquation:
         self.problem = Problem.Problem(problem)
 
     def generateGrid(self, grid, mode="All"):
-        self.grid = Grid.Grid(self.problem, **grid)
+        self.grid = Grid.Grid(self.problem)
+        self.grid.setNode(**grid["node"])
+        if mode == "Node":
+            return
+        self.grid.setEdge(**grid["edge"])
 
     def solve(self, method):
         solve = Solver.Solver()
@@ -51,12 +55,12 @@ class PoissonEquation:
 
 
 if __name__ == "__main__":
-    filename = "./Example/Problem1.json"
+    filename = "./Example/Problem3.json"
     problem = IOData.InputData().readProblemData(filename)
 
     #problem["source"] = lambda x: (-10 if ((-0.2 < x[0] < 0.2) and (-0.2 < x[1] < 0.2)) else 0)
 
-    grid = {"type":"Cartesian", "div":[100,100]}
+    grid = {"node":{"type":"Cartesian", "div":[100,100]}, "edge":{"type":"Cartesian"}}
     method = "FDM"
 
     print("Problem")
@@ -67,7 +71,7 @@ if __name__ == "__main__":
 
     print("Generate Grid")
     t1 = time.time()
-    poisson.generateGrid(grid, "Node")
+    poisson.generateGrid(grid)
     t2 = time.time()
     print(t2 - t1)
     poisson.plot("Grid")

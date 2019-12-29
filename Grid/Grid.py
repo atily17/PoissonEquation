@@ -1,18 +1,27 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from . import Node
+from . import Edge
 
 class Grid(object):
-    def __init__(self, problem, **kwargs):
+    def __init__(self, problem):
         self.problem = problem
-        self.type = kwargs["type"]
-        if self.type=="Cartesian":
-            self.node=Node.Cartesian(self.problem.domain, kwargs["div"])
+
+    def setNode(self, **node):
+        self.nodeType = node["type"]
+        if self.nodeType =="Cartesian":
+            self.node=Node.Cartesian(self.problem.domain, node["div"])
             self.node.putBorder()
             self.node.deleteOverlap()
             self.node.judgeInDomain()
             self.node.sort()
             self.node.setNextNo()
+
+    def setEdge(self, **edge):
+        self.edgeType = edge["type"]
+        if self.edgeType == "Cartesian":
+            assert self.nodeType == "Cartesian", "if edge type is 'Cartesian', grid['type'] must be 'Cartesian'"
+            self.edge = Edge.Cartesian(self.node)
 
     def print(self, gridType = "all"):
         print("-----Grid-----")

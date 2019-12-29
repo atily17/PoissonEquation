@@ -8,6 +8,7 @@ class Problem(object):
 
     # "shape:"
     def setDomain(self, **domain):
+        assert len(domain["vertexes"]) == len(domain["bc"]["bc"]), "it must be len(domain['vertexes']) == len(domain['bc']['bc'])"
         if domain["shape"]=="Polygon":
             self.domain=Domain.Polygon(domain["vertexes"], domain["bc"])
             self.domain.calcRange()

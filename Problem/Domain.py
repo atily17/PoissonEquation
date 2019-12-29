@@ -41,34 +41,34 @@ class Polygon(Domain):
             p2 = self.vertexes[(i + 1) % self.nVertexes]
             if (np.isclose(p1[0], p2[0] , rtol = rer)):
                 bordery = np.array([[p1[0], ys[j]] for j in range(len(ys))])
-                node_border = [{"point":np.array([bordery[j][0],bordery[j][1]]), "position":"b" + str(i), "nextnode":[] } 
-                    for j in range(len(bordery)) if ( (p2[1] - bordery[j][1])*(p1[1] - bordery[j][1]) < 0 )]
+                node_border = [{"point":np.array([bordery[j][0],bordery[j][1]]), "position":"b" + str(i), "nextnode":{} } 
+                    for j in range(len(bordery)) if ((p2[1] - bordery[j][1]) * (p1[1] - bordery[j][1]) < 0)]
                 node.extend(copy.deepcopy(node_border[:]))
 
             elif (np.isclose(p1[1], p2[1] , rtol = rer)):
                 borderx = np.array([[xs[j], p1[1]] for j in range(len(xs))])
-                node_border = [{"point":np.array([borderx[j][0],borderx[j][1]]), "position":"b" + str(i), "nextnode":[] } 
-                    for j in range(len(borderx)) if ( (p2[0] - borderx[j][0])*(p1[0] - borderx[j][0]) < 0 )]
+                node_border = [{"point":np.array([borderx[j][0],borderx[j][1]]), "position":"b" + str(i), "nextnode":{} } 
+                    for j in range(len(borderx)) if ((p2[0] - borderx[j][0]) * (p1[0] - borderx[j][0]) < 0)]
                 node.extend(copy.deepcopy(node_border[:]))
 
             else:
                 r = (p2[1] - p1[1]) / (p2[0] - p1[0])
                 borderx = np.array([xs, r * (xs - p2[0]) + p2[1]]).T
                 borderx = borderx[(p1[0] - borderx[:,0]) * (p2[0] - borderx[:,0]) <= 0]
-                node_borderx = [{"point":np.array([borderx[j][0],borderx[j][1]]), "position":"b" + str(i), "nextnode":[] } 
+                node_borderx = [{"point":np.array([borderx[j][0],borderx[j][1]]), "position":"b" + str(i), "nextnode":{} } 
                                 for j in range(len(borderx))]
                 node.extend(copy.deepcopy(node_borderx[:]))
                 r = (p2[0] - p1[0]) / (p2[1] - p1[1])
                 bordery = np.array([r * (ys - p2[1]) + p2[0], ys]).T
                 bordery = bordery[(p1[1] - bordery[:,1]) * (p2[1] - bordery[:,1]) <= 0]
-                node_bordery = [{"point":np.array([bordery[j][0],bordery[j][1]]), "position":"b" + str(i), "nextnode":[] } 
+                node_bordery = [{"point":np.array([bordery[j][0],bordery[j][1]]), "position":"b" + str(i), "nextnode":{} } 
                                 for j in range(len(bordery))]
                 node.extend(copy.deepcopy(node_bordery[:]))
         return node
 
     def getCornerPoint(self, node):
         for i in range(self.nVertexes):
-            node.append({"point":self.vertexes[i][:], "position":"c" + str(i), "nextnode":[]})
+            node.append({"point":self.vertexes[i][:], "position":"c" + str(i), "nextnode":{}})
 
     def getNextNode(self, nodes, rer=1e-7):
         pos0 = np.array([node["position"][0] for node in nodes]) 
@@ -88,15 +88,15 @@ class Polygon(Domain):
             if dvertex[pr] > 0:
                 for idx in range(len(indexes)):
                     if idx != 0:
-                        nodes[indexes[idx]]["nextnode"].append({"no":indexes[idx-1], "position":"b"})
-                    if idx != len(indexes)-1:
-                        nodes[indexes[idx]]["nextnode"].append({"no":indexes[idx+1], "position":"f"})
+                        nodes[indexes[idx]]["nextnode"].setdefault("b", indexes[idx - 1])
+                    if idx != len(indexes) - 1:
+                        nodes[indexes[idx]]["nextnode"].setdefault("f", indexes[idx + 1])
             else:
                 for idx in range(len(indexes)):
                     if idx != 0:
-                        nodes[indexes[idx]]["nextnode"].append({"no":indexes[idx-1], "position":"f"})
-                    if idx != len(indexes)-1:
-                        nodes[indexes[idx]]["nextnode"].append({"no":indexes[idx+1], "position":"b"})
+                        nodes[indexes[idx]]["nextnode"]["f"] = indexes[idx - 1]
+                    if idx != len(indexes) - 1:
+                        nodes[indexes[idx]]["nextnode"]["b"] = indexes[idx + 1]
 
 
     def deleteOutDomain(self, node, thetaerr=6):
@@ -114,11 +114,11 @@ class Polygon(Domain):
             vn1 = np.linalg.norm(v1, axis=1)
             vn2 = np.linalg.norm(v2, axis=1)
             theta = np.arccos(np.clip(dot / (vn1 * vn2), -1, 1))
-            thetas += np.sign(cross)*np.array(theta)
-        inx = np.where( ((pos == "nd") & ~(thetas < thetaerr)))[0]
+            thetas += np.sign(cross) * np.array(theta)
+        inx = np.where(((pos == "nd") & ~(thetas < thetaerr)))[0]
       
         for i in inx:
-            node[i]["position"]="in"
+            node[i]["position"] = "in"
 
     def isNextNodeNearBorder(self, node0, node1):
         pos0 = node0["position"]
@@ -129,55 +129,49 @@ class Polygon(Domain):
         postype1 = node1["position"][0]
         posnum0 = int(node0["position"][1:])
         posnum1 = int(node1["position"][1:])
-        if ((postype0 == "c") and (postype1 == "c") and 
-            ((posnum1 - posnum0)%self.nVertexes == 1 or ((posnum1 - posnum0)%self.nVertexes == self.nVertexes - 1))
-           ):
+        if ((postype0 == "c") and (postype1 == "c") and ((posnum1 - posnum0) % self.nVertexes == 1 or ((posnum1 - posnum0) % self.nVertexes == self.nVertexes - 1))):
             return False
-        if ((postype0 == "b") and (postype1 == "c") and 
-            ((posnum0 == posnum1) or (posnum0 == (posnum1 - 1)%self.nVertexes))
-           ):
+        if ((postype0 == "b") and (postype1 == "c") and ((posnum0 == posnum1) or (posnum0 == (posnum1 - 1) % self.nVertexes))):
             return False
-        if ((postype0 == "c") and (postype1 == "b") and 
-            ((posnum0 == posnum1) or (posnum0 == (posnum1 + 1)%self.nVertexes))
-           ):
+        if ((postype0 == "c") and (postype1 == "b") and ((posnum0 == posnum1) or (posnum0 == (posnum1 + 1) % self.nVertexes))):
             return False
 
-        pm = (node0["point"] + node1["point"])/2
+        pm = (node0["point"] + node1["point"]) / 2
         if postype0 == "b":
             vp0 = self.vertexes[posnum0]
-            vp1 = self.vertexes[(posnum0 + 1)%self.nVertexes]
+            vp1 = self.vertexes[(posnum0 + 1) % self.nVertexes]
             vVec = vp1 - vp0
             pVec = pm - vp0
             b0 = (vVec[0] * pVec[1] - vVec[1] * pVec[0]) > 0
         else:
             vp0 = self.vertexes[posnum0]
-            vp1 = self.vertexes[(posnum0 + 1)%self.nVertexes]
-            vp2 = self.vertexes[(posnum0 - 1)%self.nVertexes]
+            vp1 = self.vertexes[(posnum0 + 1) % self.nVertexes]
+            vp2 = self.vertexes[(posnum0 - 1) % self.nVertexes]
             vVec1 = vp1 - vp0
             vVec2 = vp0 - vp2
             pVec1 = pm - vp0
             pVec2 = pm - vp2
-            b0  = (vVec1[0] * pVec1[1] - vVec1[1] * pVec1[0]) > 0
+            b0 = (vVec1[0] * pVec1[1] - vVec1[1] * pVec1[0]) > 0
             b0 &= (vVec2[0] * pVec2[1] - vVec2[1] * pVec2[0]) > 0
 
         if postype1 == "b":
             vp0 = self.vertexes[posnum1]
-            vp1 = self.vertexes[(posnum1 + 1)%self.nVertexes]
+            vp1 = self.vertexes[(posnum1 + 1) % self.nVertexes]
             vVec = vp1 - vp0
             pVec = pm - vp0
             b1 = (vVec[0] * pVec[1] - vVec[1] * pVec[0]) > 0
         else:
-            vp0 = self.vertexes[ posnum1]
-            vp1 = self.vertexes[(posnum1 + 1)%self.nVertexes]
-            vp2 = self.vertexes[(posnum1 - 1)%self.nVertexes]
+            vp0 = self.vertexes[posnum1]
+            vp1 = self.vertexes[(posnum1 + 1) % self.nVertexes]
+            vp2 = self.vertexes[(posnum1 - 1) % self.nVertexes]
             vVec1 = vp1 - vp0
             vVec2 = vp0 - vp2
             pVec1 = pm - vp0
             pVec2 = pm - vp2
-            b1  = (vVec1[0] * pVec1[1] - vVec1[1] * pVec1[0]) > 0
+            b1 = (vVec1[0] * pVec1[1] - vVec1[1] * pVec1[0]) > 0
             b1 &= (vVec2[0] * pVec2[1] - vVec2[1] * pVec2[0]) > 0
 
-        return b0&b1
+        return b0 & b1
 
     def print(self):
         super().print()

@@ -19,6 +19,9 @@
     <VisualStudioVersion Condition=" '$(VisualStudioVersion)' == '' ">10.0</VisualStudioVersion>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Grid\Edge.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="IOData\InputData.py">
       <SubType>Code</SubType>
     </Compile>
@@ -73,6 +76,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Example\Problem1.json" />
+    <Content Include="Example\Problem4.json" />
     <Content Include="Example\Problem3.json" />
     <Content Include="Example\Problem2.json" />
   </ItemGroup>
