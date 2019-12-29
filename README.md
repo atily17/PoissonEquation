@@ -6,7 +6,7 @@ It solve 2-d Poisson's Equation as follows by Finite Difference Method (FDM).
 
 <img src="https://latex.codecogs.com/gif.latex?\inline&space;\frac{\partial^2u}{dx^2}+\frac{\partial^2u}{dy^2}=f" />
 
-In future, It will be able to use Finite Element Method (FEM), Boundary Element Method (BEM) and so on in.
+In future, It will be able to use Finite Element Method (FEM), Boundary Element Method (BEM) and so on.
 
 # Specification
 
