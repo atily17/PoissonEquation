@@ -55,12 +55,12 @@ class PoissonEquation:
 
 
 if __name__ == "__main__":
-    filename = "./Example/Problem3.json"
+    filename = "./Example/Problem1.json"
     problem = IOData.InputData().readProblemData(filename)
 
     #problem["source"] = lambda x: (-10 if ((-0.2 < x[0] < 0.2) and (-0.2 < x[1] < 0.2)) else 0)
 
-    grid = {"node":{"type":"Cartesian", "div":[100,100]}, "edge":{"type":"Cartesian"}}
+    grid = {"node":{"type":"Cartesian", "div":[30,30]}, "edge":{"type":"Cartesian"}}
     method = "FDM"
 
     print("Problem")

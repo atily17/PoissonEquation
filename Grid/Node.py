@@ -37,6 +37,9 @@ class Cartesian(Node):
         epsx = (self.domain.right - self.domain.left)/self.nDivX/epsilon
         epsy = (self.domain.up - self.domain.down)/self.nDivY/epsilon
         self.eps  = np.array([epsx,epsy])
+        mgsx = (self.domain.right - self.domain.left)/self.nDivX*epsilon
+        mgsy = (self.domain.up - self.domain.down)/self.nDivY*epsilon
+        self.mgs = np.array([mgsx, mgsy])
 
     def putBorder(self):
         self.domain.getBorderPoint(self.nodes, self.xs, self.ys)
@@ -111,7 +114,8 @@ class Cartesian(Node):
                     (
                         (self.nodes[x_index[x_index_i]]["position"] == "in" or self.nodes[x_index[x_index_i-1]]["position"] == "in") or
                         self.domain.isNextNodeNearBorder(self.nodes[x_index[x_index_i]], self.nodes[x_index[x_index_i - 1]])
-                    )
+                    ) and
+                    np.linalg.norm(self.nodes[x_index[x_index_i - 1]]["point"] - self.nodes[x_index[x_index_i]]["point"]) < self.mgs[1]
                   ):
                    self.nodes[x_index[x_index_i]]["nextnode"]["d"] = x_index[x_index_i - 1]
                if (
@@ -119,7 +123,8 @@ class Cartesian(Node):
                     (
                         (self.nodes[x_index[x_index_i]]["position"] == "in" or self.nodes[x_index[x_index_i+1]]["position"] == "in") or
                         self.domain.isNextNodeNearBorder(self.nodes[x_index[x_index_i]], self.nodes[x_index[x_index_i + 1]])
-                    )
+                    ) and
+                    np.linalg.norm(self.nodes[x_index[x_index_i + 1]]["point"] - self.nodes[x_index[x_index_i]]["point"]) < self.mgs[1]
                    ):
                    self.nodes[x_index[x_index_i]]["nextnode"]["u"] = x_index[x_index_i + 1]
 
@@ -133,7 +138,8 @@ class Cartesian(Node):
                     (
                         (self.nodes[y_index[y_index_i]]["position"] == "in" or self.nodes[y_index[y_index_i-1]]["position"] == "in") or
                         self.domain.isNextNodeNearBorder(self.nodes[y_index[y_index_i]], self.nodes[y_index[y_index_i - 1]])
-                    )
+                    ) and
+                    np.linalg.norm(self.nodes[y_index[y_index_i]]["point"] - self.nodes[y_index[y_index_i - 1]]["point"]) < self.mgs[0]
                   ):
                    self.nodes[y_index[y_index_i]]["nextnode"]["l"] = y_index[y_index_i - 1]
                if (
@@ -141,7 +147,8 @@ class Cartesian(Node):
                     (
                         (self.nodes[y_index[y_index_i]]["position"] == "in" or self.nodes[y_index[y_index_i+1]]["position"] == "in") or
                         self.domain.isNextNodeNearBorder(self.nodes[y_index[y_index_i]], self.nodes[y_index[y_index_i + 1]])
-                    )
+                    ) and
+                    np.linalg.norm(self.nodes[y_index[y_index_i]]["point"] - self.nodes[y_index[y_index_i + 1]]["point"]) < self.mgs[0]
                   ):
                    self.nodes[y_index[y_index_i]]["nextnode"]["r"] = y_index[y_index_i + 1]
          

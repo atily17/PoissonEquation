@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import matplotlib.collections as mcl
 import numpy as np
 from . import Node
 from . import Edge
@@ -37,13 +38,10 @@ class Grid(object):
         plt.xlim(self.problem.domain.left,self.problem.domain.right)
         plt.ylim(self.problem.domain.down,self.problem.domain.up)
         ax =fig.add_subplot(1,1,1)
-
-        co=np.array([[self.node.nodes[i]["point"][0],self.node.nodes[i]["point"][1]] for i in range(len(self.node.nodes))])
+        
+        # Domain
         domain = plt.Polygon(self.problem.domain.vertexes, zorder=1, fc = "#DDDDFF")
-
         ax.add_patch(domain)
-        ax.set_axisbelow(True)
-
         zz = 10+self.problem.domain.nVertexes
         for k in self.problem.domain.bc["priority"]:
             e1 = k
@@ -59,5 +57,14 @@ class Grid(object):
                      [self.problem.domain.vertexes[e1][1],self.problem.domain.vertexes[e2][1]],
                      c, zorder = zz, lw=5)
             zz -= 1
+        # Node
+        co=np.array([[self.node.nodes[i]["point"][0],self.node.nodes[i]["point"][1]] for i in range(len(self.node.nodes))])
         plt.scatter(co[:,0],co[:,1] , c="Magenta", zorder=100)
+
+        # Edge
+        edges = self.edge.edges
+        egs=mcl.LineCollection([[self.node.nodes[edge["p1"]]["point"],self.node.nodes[edge["p2"]]["point"]] for edge in edges])
+        ax.add_collection(egs) #, colors="k", zorder=100)
+
         plt.show()
+

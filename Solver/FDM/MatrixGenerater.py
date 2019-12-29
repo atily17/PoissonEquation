@@ -123,13 +123,13 @@ class MatrixGenerater(object):
                 p2 = nnextfNode
                 x2 = nnextfNodeVec
             
-
-            keys = list(nextNode.keys())
-            keys.remove("f")
-            keys.remove("b")
-            key = keys[0]
-            p3 = nextNode[key]
-            x3 = nextNodeVec[key]
+            p3, x3 = self.__searchBestNode(i,nextNode, normalVec)
+            #keys = list(nextNode.keys())
+            #keys.remove("f")
+            #keys.remove("b")
+            #key = keys[0]
+            #p3 = nextNode[key]
+            #x3 = nextNodeVec[key]
 
             row1 = [x1[0], x2[0], x3[0], 0, 0]
             row2 = [x1[1], x2[1], x3[1], 0, 0]
@@ -144,3 +144,61 @@ class MatrixGenerater(object):
             self.matrix[i][p1] = ans[0]
             self.matrix[i][p2] = ans[1]
             self.matrix[i][p3] = ans[2]
+
+    def __searchBestNode(self, i, nextNode, normalVec):
+        temp1 = copy.deepcopy(nextNode)
+        temp1.pop("f")
+        temp1.pop("b")
+        temp1= list(temp1.values())
+        if len(temp1) != 0:
+            nextValue = np.array([temp1[j] for j in range(len(temp1))])
+            nextPoint = np.array([self.nodes[nextValue[j]]["point"] for j in range(len(nextValue))])
+            nextVec   = (nextPoint - self.nodes[i]["point"])
+            nextVec1  = nextVec/np.linalg.norm(nextVec, axis = 1)
+            nextDot   = nextVec1[:,0] * normalVec[0] + nextVec1[:,1] * normalVec[1]
+            nextIndex = np.argmax(nextDot)
+            nextMax   = nextDot[nextIndex]
+        else:
+            nextMax   = 0
+
+        nnextbNode = self.nodes[nextNode["b"]]["nextnode"]
+        temp2 = copy.deepcopy(nnextbNode)
+        temp2.pop("f")
+        temp2.pop("b")
+        temp2=list(temp2.values())
+        if len(temp2) != 0:
+            nnextbValue = np.array([temp2[j] for j in range(len(temp2))])
+            nnextbPoint = np.array([self.nodes[nnextbValue[j]]["point"] for j in range(len(nnextbValue))])
+            nnextbVec   = (nnextbPoint - self.nodes[i]["point"])
+            nnextbVec1  = nnextbVec/np.linalg.norm(nnextbVec, axis = 1)
+            nnextbDot   = nnextbVec1[:,0] * normalVec[0] + nnextbVec1[:,1] * normalVec[1]
+            nnextbIndex = np.argmax(nnextbDot)
+            nnextbMax   = nnextbDot[nnextbIndex]
+        else:
+            nnextbMax   = 0
+
+
+        nnextfNode = self.nodes[nextNode["f"]]["nextnode"]
+        temp3 = copy.deepcopy(nnextfNode)
+        temp3.pop("f")
+        temp3.pop("b")
+        temp3=list(temp3.values())
+        if len(temp3) != 0:
+            nnextfValue = np.array([temp3[j] for j in range(len(temp3))])
+            nnextfPoint = np.array([self.nodes[nnextfValue[j]]["point"] for j in range(len(nnextfValue))])
+            nnextfVec   = (nnextfPoint - self.nodes[i]["point"])
+            nnextfVec1  = nnextfVec/np.linalg.norm(nnextfVec, axis = 1)
+            nnextfDot   = nnextfVec1[:,0] * normalVec[0] + nnextfVec1[:,1] * normalVec[1]
+            nnextfIndex = np.argmax(nnextfDot)
+            nnextfMax   = nnextfDot[nnextfIndex]
+        else:
+            nnextfMax   = 0
+
+        if nnextfMax > nnextbMax and nnextfMax > nextMax:
+            return nnextfValue[nnextfIndex], nnextfVec[nnextfIndex]
+
+        elif nnextbMax > nnextfMax and nnextbMax > nextMax:
+            return nnextbValue[nnextbIndex], nnextbVec[nnextbIndex]
+
+        else:
+            return nextValue[nextIndex], nextVec[nextIndex]

@@ -11,5 +11,8 @@ class Cartesian(Edge):
             self.generateEdge()
 
     def generateEdge(self):
-        bc_node = [node for node in self.nodes if node["position"]!="in"]
-        bc_node
+        self.edges = []
+        self.edges.extend([{"p1":i, "p2": self.nodes[i]["nextnode"]["f"]} for i in range(len(self.nodes)) if "f" in self.nodes[i]["nextnode"]])
+        self.edges.extend([{"p1":i, "p2": self.nodes[i]["nextnode"]["r"]} for i in range(len(self.nodes)) if "r" in self.nodes[i]["nextnode"]])
+        self.edges.extend([{"p1":i, "p2": self.nodes[i]["nextnode"]["u"]} for i in range(len(self.nodes)) if "u" in self.nodes[i]["nextnode"]])
+        x=1
