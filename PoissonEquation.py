@@ -59,7 +59,17 @@ if __name__ == "__main__":
 
     #problem["source"] = lambda x: (-10 if ((-0.2 < x[0] < 0.2) and (-0.2 < x[1] < 0.2)) else 0)
 
-    grid = {"node":{"type":"Cartesian", "div":[100,100]}, "edge":{"type":"Cartesian"}}
+    grid = {"node":{
+                "type":"Cartesian",
+                "div":[10,10]
+                }, 
+            "edge":{
+                "type":"NotCross"
+                },
+            "cell":{
+                "type":"Triangle"
+                }
+            }
     method = "FDM"
 
     print("Problem")
@@ -70,21 +80,21 @@ if __name__ == "__main__":
 
     print("Generate Grid")
     t1 = time.time()
-    poisson.generateGrid(grid, "FDM")
+    poisson.generateGrid(grid, "FEM")
     t2 = time.time()
     print(t2 - t1)
     poisson.plot("Grid")
+    
+    #print("solve")
+    #t1 = time.time()
+    #poisson.solve(method)
+    #t2 = time.time()
+    #print(t2 - t1)
 
-    print("solve")
-    t1 = time.time()
-    poisson.solve(method)
-    t2 = time.time()
-    print(t2 - t1)
+    #poisson.result()
+    #poisson.plot("Potential")
+    #poisson.plot("FluxDensity")
 
-    poisson.result()
-    poisson.plot("Potential")
-    poisson.plot("FluxDensity")
-
-    #poisson.print()
-    filename = "./potential.json"
-    IOData.OutputData().writeFluxDensity(poisson.result.fluxDensity.fluxDensity, filename)
+    ##poisson.print()
+    #filename = "./potential.json"
+    #IOData.OutputData().writeFluxDensity(poisson.result.fluxDensity.fluxDensity, filename)

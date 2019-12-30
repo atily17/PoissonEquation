@@ -120,10 +120,12 @@ class Polygon(Domain):
         for i in inx:
             node[i]["position"] = "in"
 
-    def isNextNodeNearBorder(self, node0, node1):
+    def isNextNodeNearBorder(self, node0, node1, ebs):
         pos0 = node0["position"]
         pos1 = node1["position"]
         if pos0 == pos1:
+            return False
+        if np.linalg.norm(node0["point"]- node1["point"]) > np.linalg.norm(ebs):
             return False
         postype0 = node0["position"][0]
         postype1 = node1["position"][0]

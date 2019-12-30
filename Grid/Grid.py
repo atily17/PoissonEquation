@@ -20,7 +20,7 @@ class Grid(object):
             if "eps" in node:
                 self.node=Node.Cartesian(self.problem.domain, node["div"], node["eps"])
             else :
-                self.node=Node.Cartesian(self.problem.domain, node["div"], 10)
+                self.node=Node.Cartesian(self.problem.domain, node["div"])
             self.node.putBorder()
             self.node.deleteOverlap()
             self.node.judgeInDomain()
@@ -45,7 +45,7 @@ class Grid(object):
             if "eps" in node:
                 self.node=Node.Cartesian(self.problem.domain, node["div"], node["eps"])
             else :
-                self.node=Node.Cartesian(self.problem.domain, node["div"], 10)
+                self.node=Node.Cartesian(self.problem.domain, node["div"])
             self.node.putBorder()
             self.node.deleteOverlap()
             self.node.judgeInDomain()
@@ -53,7 +53,27 @@ class Grid(object):
             self.node.setNextNo()
 
     def _setNodeCaseFEM(self, **grid):
-        pass
+        node = grid["node"]
+        edge = grid["edge"]
+        cell = grid["cell"]
+        self.nodeType = node["type"]
+        self.edgeType = edge["type"]
+        if self.nodeType =="Cartesian":
+            if "eps" in node:
+                self.node=Node.Cartesian(self.problem.domain, node["div"], node["eps"])
+            else :
+                self.node=Node.Cartesian(self.problem.domain, node["div"], 3)
+            self.node.putBorder()
+            self.node.deleteOverlap("eps")
+            self.node.judgeInDomain()
+            self.node.sort()
+            self.node.setNextNo()
+
+        if self.edgeType == "NotCross":
+            self.edge = Edge.Cartesian(self.problem.domain, self.node)
+        
+        self.cell = Cell.Triangle(self.node, self.edge)
+        self.cell.generateCell()
 
     def print(self, gridType = "all"):
         print("-----Grid-----")
@@ -95,7 +115,7 @@ class Grid(object):
         # Edge
         try:
             edges = self.edge.edges
-            egs=mcl.LineCollection([[self.node.nodes[edge["p1"]]["point"],self.node.nodes[edge["p2"]]["point"]] for edge in edges])
+            egs=mcl.LineCollection([[self.node.nodes[edge["node1"]]["point"],self.node.nodes[edge["node2"]]["point"]] for edge in edges])
             ax.add_collection(egs) #, colors="k", zorder=100)
         except:
             1
