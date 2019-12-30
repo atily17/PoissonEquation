@@ -12,7 +12,7 @@ class Node(object):
 
 
 class Cartesian(Node):
-    def __init__(self, domain, div, epsilon = 3):
+    def __init__(self, domain, div, epsilon = 10):
         self.domain = domain
         if isinstance(div[0], (int)):
             self.nDivX = div[0]

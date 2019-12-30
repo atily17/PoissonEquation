@@ -13,11 +13,10 @@ class PoissonEquation:
         self.problem = Problem.Problem(problem)
 
     def generateGrid(self, grid, mode="All"):
-        self.grid = Grid.Grid(self.problem)
-        self.grid.setNode(**grid["node"])
-        if mode == "Node":
-            return
-        self.grid.setEdge(**grid["edge"])
+        if mode == "FDM":
+            self.grid = Grid.Grid(self.problem, grid, "FDM")
+        if mode == "FEM":
+            self.grid = Grid.Grid(self.problem, grid, "FEM")
 
     def solve(self, method):
         solve = Solver.Solver()
@@ -60,7 +59,7 @@ if __name__ == "__main__":
 
     #problem["source"] = lambda x: (-10 if ((-0.2 < x[0] < 0.2) and (-0.2 < x[1] < 0.2)) else 0)
 
-    grid = {"node":{"type":"Cartesian", "div":[30,30]}, "edge":{"type":"Cartesian"}}
+    grid = {"node":{"type":"Cartesian", "div":[100,100]}, "edge":{"type":"Cartesian"}}
     method = "FDM"
 
     print("Problem")
@@ -71,7 +70,7 @@ if __name__ == "__main__":
 
     print("Generate Grid")
     t1 = time.time()
-    poisson.generateGrid(grid)
+    poisson.generateGrid(grid, "FDM")
     t2 = time.time()
     print(t2 - t1)
     poisson.plot("Grid")

@@ -19,6 +19,9 @@
     <VisualStudioVersion Condition=" '$(VisualStudioVersion)' == '' ">10.0</VisualStudioVersion>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Grid\Cell.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Grid\Edge.py">
       <SubType>Code</SubType>
     </Compile>

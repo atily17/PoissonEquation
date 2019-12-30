@@ -4,14 +4,14 @@
     "vertexes": [
       [ -1, -1 ],
       [ 1, -1 ],
-      [ 0.4, 1 ],
-      [ -0.4, 1 ]
+      [ 0.2, 1 ],
+      [ -0.2, 1 ]
     ],
     "bc": {
       "bc": [
         {
           "bctype": "Dirichlet",
-          "constant": -1
+          "constant": 1
         },
         {
           "bctype": "Neumann",
@@ -19,7 +19,7 @@
         },
         {
           "bctype": "Dirichlet",
-          "constant": 1
+          "constant": -1
         },
         {
           "bctype": "Neumann",

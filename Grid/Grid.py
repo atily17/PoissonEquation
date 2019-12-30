@@ -3,15 +3,24 @@ import matplotlib.collections as mcl
 import numpy as np
 from . import Node
 from . import Edge
+from . import Cell
 
 class Grid(object):
-    def __init__(self, problem):
+    def __init__(self, problem, node = None, type = None):
         self.problem = problem
+        if type == "FDM":
+            self._setNodeCaseFDM(**node["node"])
+        elif type == "FEM":
+            self._setNodeCaseFEM(**node)
+
 
     def setNode(self, **node):
         self.nodeType = node["type"]
         if self.nodeType =="Cartesian":
-            self.node=Node.Cartesian(self.problem.domain, node["div"])
+            if "eps" in node:
+                self.node=Node.Cartesian(self.problem.domain, node["div"], node["eps"])
+            else :
+                self.node=Node.Cartesian(self.problem.domain, node["div"], 10)
             self.node.putBorder()
             self.node.deleteOverlap()
             self.node.judgeInDomain()
@@ -23,6 +32,28 @@ class Grid(object):
         if self.edgeType == "Cartesian":
             assert self.nodeType == "Cartesian", "if edge type is 'Cartesian', grid['type'] must be 'Cartesian'"
             self.edge = Edge.Cartesian(self.node)
+
+    def setCell(self, **cell):
+        self.cellType = cell["type"]
+        if self.cellType == "Cartesian":
+            assert self.nodeType == "Cartesian", "if edge type is 'Cartesian', grid['type'] must be 'Cartesian'"
+            self.cell = Cell.Cartesian(self.node, self.edge)
+
+    def _setNodeCaseFDM(self, **node):
+        self.nodeType = node["type"]
+        if self.nodeType =="Cartesian":
+            if "eps" in node:
+                self.node=Node.Cartesian(self.problem.domain, node["div"], node["eps"])
+            else :
+                self.node=Node.Cartesian(self.problem.domain, node["div"], 10)
+            self.node.putBorder()
+            self.node.deleteOverlap()
+            self.node.judgeInDomain()
+            self.node.sort()
+            self.node.setNextNo()
+
+    def _setNodeCaseFEM(self, **grid):
+        pass
 
     def print(self, gridType = "all"):
         print("-----Grid-----")
@@ -62,9 +93,12 @@ class Grid(object):
         plt.scatter(co[:,0],co[:,1] , c="Magenta", zorder=100)
 
         # Edge
-        edges = self.edge.edges
-        egs=mcl.LineCollection([[self.node.nodes[edge["p1"]]["point"],self.node.nodes[edge["p2"]]["point"]] for edge in edges])
-        ax.add_collection(egs) #, colors="k", zorder=100)
+        try:
+            edges = self.edge.edges
+            egs=mcl.LineCollection([[self.node.nodes[edge["p1"]]["point"],self.node.nodes[edge["p2"]]["point"]] for edge in edges])
+            ax.add_collection(egs) #, colors="k", zorder=100)
+        except:
+            1
 
         plt.show()
 
