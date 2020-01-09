@@ -7,6 +7,9 @@ class Edge(object):
             self.node = node
         self.edges = []
 
+    def setNo(self):
+        self.edges = [ {**self.edges[i] , **{"no": i}} for i in range(len(self.edges))]
+
     def setEdgeDataNode(self):
         nodes = self.node.nodes
         for node in nodes:
@@ -56,12 +59,15 @@ class Edge(object):
         max_index = np.argmax(angle)
         return nextedges_indeices[max_index]
 
-    def getAngle(self, vec1, vec2):
+    def getAngle(self, vector1, vector2):
+        vec1 = vector1 / np.linalg.norm(vector1)
+        nn = np.linalg.norm(vector2 , axis = 1)
+        vec2 = (vector2.T / np.linalg.norm(vector2 , axis = 1)).T
         cross = vec1[0]*vec2[:,1] - vec1[1]*vec2[:,0]
         dot = vec1[0]*vec2[:,0] + vec1[1]* vec2[:,1]
         dot[cross < 0] += 1
         dot[(cross == 0) & (dot < 0)] = 0
-        dot[cross > 0] -= 1
+        dot[cross > 0] = dot[cross > 0] * (-1) - 1
         return dot
 
     def __test__setEdgeDataNode(self):

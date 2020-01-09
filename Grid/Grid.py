@@ -68,9 +68,11 @@ class Grid(object):
             self.node.judgeInDomain()
             self.node.sort()
             self.node.setNextNo()
+            self.node.setNo()
 
         if self.edgeType == "NotCross":
             self.edge = Edge.Cartesian(self.problem.domain, self.node)
+            self.edge.setNo()
         
         self.cell = Cell.Triangle(self.node, self.edge)
         self.cell.generateCell()

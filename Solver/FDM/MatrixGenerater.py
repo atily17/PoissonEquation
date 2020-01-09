@@ -17,7 +17,6 @@ class MatrixGenerater(object):
                 self.border(i)
                 continue
 
-            
             l_index = self.nodes[i]["nextnode"]["l"]
             dxl = self.nodes[i]["point"][0] - self.nodes[l_index]["point"][0]
             

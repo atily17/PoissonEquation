@@ -4,16 +4,19 @@ import itertools
 from . import Node
 
 class Node(object):
-    def __init__(self):
-        pass
+    def __init__(self,  domain):
+        self.nodes = []
+        self.domain = domain
 
     def judgeInOut(self, domain, point):
         pass
 
+    def setNo(self):
+        self.nodes = [ {**self.nodes[i] , **{"no": i}} for i in range(len(self.nodes))]
 
 class Cartesian(Node):
     def __init__(self, domain, div, epsilon=3, ebs=2):
-        self.domain = domain
+        super().__init__(domain)
         if isinstance(div[0], (int)):
             self.nDivX = div[0]
             self.xs = np.linspace(self.domain.left, self.domain.right, self.nDivX)
