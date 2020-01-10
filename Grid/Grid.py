@@ -75,7 +75,13 @@ class Grid(object):
             self.edge.setNo()
         
         self.cell = Cell.Triangle(self.node, self.edge)
+        self.edge.cell = self.cell
         self.cell.generateCell()
+        self.cell.splitTriangle()
+        self.cell.flipTriangle()
+
+        self.edge.print()
+        self.cell.print()
 
     def print(self, gridType = "all"):
         print("-----Grid-----")

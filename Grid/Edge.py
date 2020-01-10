@@ -6,11 +6,47 @@ class Edge(object):
         if node is not None:
             self.node = node
         self.edges = []
+        self.cell = None
 
     def setNo(self):
         self.edges = [ {**self.edges[i] , **{"no": i}} for i in range(len(self.edges))]
 
-    def setEdgeDataNode(self):
+    def setEdgeAdjacentCell(self, edge = None):
+        if edge is None:
+            self.setAllEdgeDataNode()
+            return
+        nodes = self.node.nodes
+        for node in nodes:
+            node["edges"] = []
+        if type(edge) == int:
+            edge = self.edges[edge]
+
+        cells = self.cell.cells
+
+    def setAllEdgeAdjacentCell(self):
+        edges = self.edges
+        cells = self.cell.cells
+        for edge in edges:
+            edge["cells"] = []
+        for i,cell in enumerate(cells):
+            for edge in cell["edges"]:
+                edges[edge]["cells"].append(i)
+        self._test_setEdgeDataCell()
+
+    def setEdgeDataNode(self, edge = None):
+        if edge is None:
+            self.setAllEdgeDataNode()
+            return
+        nodes = self.node.nodes
+        for node in nodes:
+            node["edges"] = []
+        if type(edge) == int:
+            edge = self.edges[edge]
+        nodes[edge["node1"]]["edges"].append(edge["no"])
+        nodes[edge["node2"]]["edges"].append(edge["no"])
+
+
+    def setAllEdgeDataNode(self):
         nodes = self.node.nodes
         for node in nodes:
             node["edges"] = []
@@ -18,6 +54,12 @@ class Edge(object):
             nodes[edge["node1"]]["edges"].append(i)
             nodes[edge["node2"]]["edges"].append(i)
         self.__test__setEdgeDataNode()
+
+    def setEdgeLength(self, edge):
+        if type(edge) == int:
+            edge = self.edges[edge]
+        nodes = self.node.nodes
+        edge["length"] = np.linalg.norm(nodes[edge["node2"]]["point"] - nodes[edge["node1"]]["point"] )
 
     def getNextEdges(self, edge_index, node_no = None):
         nodes = self.node.nodes
@@ -70,6 +112,14 @@ class Edge(object):
         dot[cross > 0] = dot[cross > 0] * (-1) - 1
         return dot
 
+    def _test_setEdgeDataCell(self):
+        edges = self.edges
+        for edge in edges:
+            if edge["position"] == "in":
+                assert(len(edge["cells"]) == 2)
+            else:
+                assert(len(edge["cells"]) == 1)
+
     def __test__setEdgeDataNode(self):
         nodes = self.node.nodes
         debug = [0 for i in range(len(self.edges))]
@@ -78,11 +128,16 @@ class Edge(object):
                 debug[edge] += 1
         assert(np.all(np.array(debug) == 2))
 
+    def _checkCross(self, p1, p2, pts1, pts2):
+        b1 = (p2[0] - p1[0]) * (pts1[:,1] - p1[1]) - (p2[1] - p1[1]) * (pts1[:,0] - p1[0])
+        b2 = (p2[0] - p1[0]) * (pts2[:,1] - p1[1]) - (p2[1] - p1[1]) * (pts2[:,0] - p1[0])
+        b3 = (pts2[:,0] - pts1[:,0]) * (p1[1] - pts1[:,1]) - (pts2[:,1] - pts1[:,1]) * (p1[0] - pts1[:,0])
+        b4 = (pts2[:,0] - pts1[:,0]) * (p2[1] - pts1[:,1]) - (pts2[:,1] - pts1[:,1]) * (p2[0] - pts1[:,0])
+        return (b1 * b2 < 0) & (b3 * b4 < 0)
 
-
-
-
-
+    def print(self):
+        for i in range(len(self.edges)):
+            print(i, self.edges[i])
 
 class Cartesian(Edge):
     def __init__(self, domain ,node=None):
@@ -169,11 +224,3 @@ class Cartesian(Edge):
         deleteIndex = set(deleteIndex)
         self.edges = [self.edges[i] for i in range(len(self.edges)) if i not in deleteIndex]
         print(deleteIndex)
-
-
-    def _checkCross(self,p1, p2, pts1, pts2):
-        b1 = (p2[0] - p1[0]) * (pts1[:,1] - p1[1]) - (p2[1] - p1[1]) * (pts1[:,0] - p1[0])
-        b2 = (p2[0] - p1[0]) * (pts2[:,1] - p1[1]) - (p2[1] - p1[1]) * (pts2[:,0] - p1[0])
-        b3 = (pts2[:,0] - pts1[:,0]) * (p1[1] - pts1[:,1]) - (pts2[:,1] - pts1[:,1]) * (p1[0] - pts1[:,0])
-        b4 = (pts2[:,0] - pts1[:,0]) * (p2[1] - pts1[:,1]) - (pts2[:,1] - pts1[:,1]) * (p2[0] - pts1[:,0])
-        return (b1 * b2 < 0) & (b3 * b4 < 0)
