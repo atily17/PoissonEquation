@@ -82,6 +82,9 @@ class Grid(object):
         self.cell.getNo()
         self.cell.getArea()
 
+        self.node.setCellData()
+
+        self.node.print()
         self.edge.print()
         self.cell.print()
 

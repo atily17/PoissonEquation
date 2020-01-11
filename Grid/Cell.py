@@ -7,6 +7,7 @@ class Cell(object):
         self.edge = edge
         self.cells = []
         self.eps = self.node.eps[0]**2 * self.node.eps[1]**2
+        self.node.cell = self
 
     def generateCell(self):
         self.cells = []
@@ -83,7 +84,7 @@ class Cell(object):
         tempedge = {"node1":nodeNo1, "node2":nodeNo2, "no":len(edges), "position":"in"}
         self.edge.setEdgeLength(tempedge)
         edges.append(tempedge)
-        self.edge.setEdgeDataNode(edges[-1])
+        self.node.setEdgeDataNode(edges[-1])
         if diagonalNo1 < diagonalNo2:
             l_diagonalNo = diagonalNo1
             g_diagonalNo = diagonalNo2
@@ -109,8 +110,9 @@ class Cell(object):
             assert(cell["n_vertexes"] > 2 )
 
     def print(self):
+        print("-----Cell-----")
         for i in range(len(self.cells)):
-            print(i, self.cells[i])
+            print(self.cells[i])
 
 class Triangle(Cell):
     def __init__(self, node, edge):
@@ -130,14 +132,12 @@ class Triangle(Cell):
                     n2 = 2
                     continue
                 n2 += 1
-                if (n2 == cell["n_vertexes"]):
+                if (n2 == self.cells[i]["n_vertexes"]):
                     n1 += 1
                     n2 = n1 + 2
-                    assert(n2 < self.cells[i]["n_vertexes"])
 
         self.edge.setAllEdgeAdjacentCell()
         self.print()
-        #self.generateCell()
 
     def flipTriangle(self):
         nodes = self.node.nodes
@@ -167,8 +167,6 @@ class Triangle(Cell):
 
     def _flip(self, edge):
         print(edge["no"], "Flipping!")
-        # TODO: setting cell
-        # 四角形を作ってからが良さそう
         rect = self.getRectangle(edge)
         print(rect)
         cell1 = self.cells[edge["cells"][0]]

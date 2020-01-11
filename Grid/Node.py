@@ -6,13 +6,67 @@ from . import Node
 class Node(object):
     def __init__(self,  domain):
         self.nodes = []
+        self.edges = None
+        self.cells = None
         self.domain = domain
 
     def judgeInOut(self, domain, point):
         pass
 
+    def setEdge(self, edge):
+        self.edge = edge
+
+    def setCell(self, cell):
+        self.cell = cell
+
+    def setEdgeDataNode(self, edge = None):
+        if edge is None:
+            self.setAllEdgeDataNode()
+            return
+        nodes = self.nodes
+        if type(edge) == int:
+            edge = self.edge.edges[edge]
+        nodes[edge["node1"]]["edges"].append(edge["no"])
+        nodes[edge["node2"]]["edges"].append(edge["no"])
+
+    def setAllEdgeDataNode(self):
+        nodes = self.nodes
+        for node in nodes:
+            node["edges"] = []
+        for i, edge in enumerate(self.edge.edges):
+            nodes[edge["node1"]]["edges"].append(i)
+            nodes[edge["node2"]]["edges"].append(i)
+        self.__test__setEdgeDataNode()
+
+    def setCellData(self, cell = None):
+        if cell is None:
+            self.setAllCellData()
+            return
+        nodes = self.nodes
+        if type(cell) == int:
+            cell = self.cell.cells[edge]
+        #TODO: 
+        return
+
+    def setAllCellData(self):
+        nodes = self.nodes
+        cells = self.cell.cells
+        for node in nodes:
+            node["cells"] = []
+        for i,cell in enumerate(cells):
+            for node in cell["nodes"]:
+                nodes[node]["cells"].append(i)
+
     def setNo(self):
         self.nodes = [ {**self.nodes[i] , **{"no": i}} for i in range(len(self.nodes))]
+
+    def __test__setEdgeDataNode(self):
+        nodes = self.nodes
+        debug = [0 for i in range(len(self.edge.edges))]
+        for node in nodes:
+            for edge in node["edges"]:
+                debug[edge] += 1
+        assert(np.all(np.array(debug) == 2))
 
 class Cartesian(Node):
     def __init__(self, domain, div, epsilon=3, ebs=2):
@@ -145,4 +199,4 @@ class Cartesian(Node):
         np.set_printoptions(precision = 3)
         print("-----Node-----")
         for i, nodes in enumerate(self.nodes):
-            print("node" + str(i), nodes)
+            print(nodes)

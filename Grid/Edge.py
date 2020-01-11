@@ -33,28 +33,6 @@ class Edge(object):
                 edges[edge]["cells"].append(i)
         self._test_setEdgeDataCell()
 
-    def setEdgeDataNode(self, edge = None):
-        if edge is None:
-            self.setAllEdgeDataNode()
-            return
-        nodes = self.node.nodes
-        for node in nodes:
-            node["edges"] = []
-        if type(edge) == int:
-            edge = self.edges[edge]
-        nodes[edge["node1"]]["edges"].append(edge["no"])
-        nodes[edge["node2"]]["edges"].append(edge["no"])
-
-
-    def setAllEdgeDataNode(self):
-        nodes = self.node.nodes
-        for node in nodes:
-            node["edges"] = []
-        for i, edge in enumerate(self.edges):
-            nodes[edge["node1"]]["edges"].append(i)
-            nodes[edge["node2"]]["edges"].append(i)
-        self.__test__setEdgeDataNode()
-
     def setEdgeLength(self, edge):
         if type(edge) == int:
             edge = self.edges[edge]
@@ -120,14 +98,6 @@ class Edge(object):
             else:
                 assert(len(edge["cells"]) == 1)
 
-    def __test__setEdgeDataNode(self):
-        nodes = self.node.nodes
-        debug = [0 for i in range(len(self.edges))]
-        for node in nodes:
-            for edge in node["edges"]:
-                debug[edge] += 1
-        assert(np.all(np.array(debug) == 2))
-
     def _checkCross(self, p1, p2, pts1, pts2):
         b1 = (p2[0] - p1[0]) * (pts1[:,1] - p1[1]) - (p2[1] - p1[1]) * (pts1[:,0] - p1[0])
         b2 = (p2[0] - p1[0]) * (pts2[:,1] - p1[1]) - (p2[1] - p1[1]) * (pts2[:,0] - p1[0])
@@ -136,8 +106,9 @@ class Edge(object):
         return (b1 * b2 < 0) & (b3 * b4 < 0)
 
     def print(self):
+        print("-----Edge-----")
         for i in range(len(self.edges)):
-            print(i, self.edges[i])
+            print(self.edges[i])
 
 class Cartesian(Edge):
     def __init__(self, domain ,node=None):
@@ -158,7 +129,8 @@ class Cartesian(Edge):
                      for edge in self.edges]
         self._deleteCross()
         self.sort()
-        self.setEdgeDataNode()
+        self.node.edge = self
+        self.node.setEdgeDataNode()
 
     def sort(self):
         self.edges = sorted(self.edges, key=lambda x: [x["node1"],x["node2"]])
