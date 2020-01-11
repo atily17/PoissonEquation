@@ -60,6 +60,10 @@
     <Compile Include="Solver\FDM\MatrixGenerater.py" />
     <Compile Include="Solver\FDM\VectorGenerater.py" />
     <Compile Include="Solver\FDM\__init__.py" />
+    <Compile Include="Solver\FEM\FEM.py" />
+    <Compile Include="Solver\FEM\MatrixGenerater.py" />
+    <Compile Include="Solver\FEM\VectorGenerater.py" />
+    <Compile Include="Solver\FEM\__init__.py" />
     <Compile Include="Solver\Solver.py">
       <SubType>Code</SubType>
     </Compile>
@@ -73,6 +77,7 @@
     <Folder Include="Result" />
     <Folder Include="Solver" />
     <Folder Include="Solver\FDM" />
+    <Folder Include="Solver\FEM\" />
   </ItemGroup>
   <ItemGroup>
     <InterpreterReference Include="Global|PythonCore|3.7" />

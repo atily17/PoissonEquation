@@ -50,6 +50,9 @@ class Cell(object):
         self.cells = [{**cell, "n_vertexes": len(cell["nodes"])} for cell in self.cells]
         self._test_checkCellExistArea()
 
+    def getNo(self):
+        self.cells = [ {**self.cells[i] , "no": i} for i in range(len(self.cells))]
+
     def splitCell(self, cellNo, diagonalNo1, diagonalNo2):
         cell = self.cells[cellNo]
         n_vertexes = cell["n_vertexes"]
@@ -159,12 +162,55 @@ class Triangle(Cell):
 
             radius   = radvec[0]**2 + radvec[1]**2
             distance = tempvec[:,0]**2 + tempvec[:,1]**2
-            if np.all(distance + self.eps < radius):
-                print(edge["no"], "Flipping!")
-                edge["node1"] = tempnodes[0]
-                edge["node2"] = tempnodes[1]
-                # TODO: setting cell
+            if np.any(distance + self.eps < radius):
+                self._flip(edge)
 
+    def _flip(self, edge):
+        print(edge["no"], "Flipping!")
+        # TODO: setting cell
+        # 四角形を作ってからが良さそう
+        rect = self.getRectangle(edge)
+        print(rect)
+        cell1 = self.cells[edge["cells"][0]]
+        cell2 = self.cells[edge["cells"][1]]
+
+        edge["node1"] = rect["nodes"][1]
+        edge["node2"] = rect["nodes"][3]
+
+        cell1["nodes"] = [rect["nodes"][0],rect["nodes"][1],rect["nodes"][3]]
+        cell2["nodes"] = [rect["nodes"][2],rect["nodes"][3],rect["nodes"][1]]
+        cell1["edges"] = [rect["edges"][0],edge["no"], rect["edges"][3]]
+        cell2["edges"] = [rect["edges"][1],edge["no"], rect["edges"][2]]
+
+
+    def getRectangle(self, edge):
+        cell1 = copy.deepcopy(self.cells[edge["cells"][0]])
+        cell2 = copy.deepcopy(self.cells[edge["cells"][1]])
+
+        nodes1 = cell1["nodes"][:]
+        edges1 = cell1["edges"][:]
+        nodes2 = cell2["nodes"][:]
+        edges2 = cell2["edges"][:]
+
+        while(edges1.index(edge["no"]) !=2 ):
+            f0 = edges1[0]
+            edges1.remove(f0)
+            edges1.append(f0)
+            f0 = nodes1[0]
+            nodes1.remove(f0)
+            nodes1.append(f0)
+        while(edges2.index(edge["no"]) !=2 ):
+            f0 = edges2[0]
+            edges2.remove(f0)
+            edges2.append(f0)
+            f0 = nodes2[0]
+            nodes2.remove(f0)
+            nodes2.append(f0)
+
+        rectedges = edges1[:len(edges1)-1] + edges2[:len(edges2)-1]
+        rectnodes = nodes1[:len(nodes1)-1] + nodes2[:len(nodes2)-1]
+        rect = {"nodes":rectnodes, "edges":rectedges}
+        return rect
 
     def getCircumcenter(self, cell):
         if type(cell) == int:
@@ -187,3 +233,18 @@ class Triangle(Cell):
 
         circumcenter = (pp[0]*nodesPt[0] + pp[1]*nodesPt[1] + pp[2]*nodesPt[2])/(pp[0] + pp[1] + pp[2])
         return circumcenter
+
+    def getArea(self, cell = None):
+        if cell is None :
+            self.getAllArea()
+
+    def getAllArea(self):
+        nodes = self.node.nodes
+        cellsnodes = [cell["nodes"][:] for cell in self.cells]
+        cellsnodespoint = np.array([[nodes[cellnode]["point"] for cellnode in cellnodes] for cellnodes in cellsnodes])
+
+        vec1 = cellsnodespoint[:,1,:] - cellsnodespoint[:,0,:]
+        vec2 = cellsnodespoint[:,2,:] - cellsnodespoint[:,0,:]
+
+        areas = np.abs(vec1[:,0]*vec2[:,1] - vec2[:,0]*vec1[:,1])/2
+        self.cells = [{**self.cells[i], "area":areas[i]} for i in range(len(self.cells))]

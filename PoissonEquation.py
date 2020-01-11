@@ -22,6 +22,8 @@ class PoissonEquation:
         solve = Solver.Solver()
         if method == "FDM":
             self.solution = solve.FDM(self.problem, self.grid)
+        if method == "FEM":
+            self.solution = solve.FEM(self.problem, self.grid)
 
     def result(self):
         self.result = Result.Result(self.solution, self.grid, self.problem)
@@ -70,7 +72,7 @@ if __name__ == "__main__":
                 "type":"Triangle"
                 }
             }
-    method = "FDM"
+    method = "FEM"
 
     print("Problem")
     t1 = time.time()
@@ -80,16 +82,16 @@ if __name__ == "__main__":
 
     print("Generate Grid")
     t1 = time.time()
-    poisson.generateGrid(grid, "FEM")
+    poisson.generateGrid(grid, method)
     t2 = time.time()
     print(t2 - t1)
     poisson.plot("Grid")
     
-    #print("solve")
-    #t1 = time.time()
-    #poisson.solve(method)
-    #t2 = time.time()
-    #print(t2 - t1)
+    print("solve")
+    t1 = time.time()
+    poisson.solve(method)
+    t2 = time.time()
+    print(t2 - t1)
 
     #poisson.result()
     #poisson.plot("Potential")

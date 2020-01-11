@@ -79,6 +79,8 @@ class Grid(object):
         self.cell.generateCell()
         self.cell.splitTriangle()
         self.cell.flipTriangle()
+        self.cell.getNo()
+        self.cell.getArea()
 
         self.edge.print()
         self.cell.print()
