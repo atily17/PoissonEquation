@@ -57,6 +57,21 @@ class Node(object):
             for node in cell["nodes"]:
                 nodes[node]["cells"].append(i)
 
+    def setNextNodeFromEdge(self, node = None):
+        if node is None:
+            self.setAllNextNodeFromEdge()
+            return
+        assert(0, "TODO:")
+
+    def setAllNextNodeFromEdge(self):
+        nodes = self.nodes
+        for node in nodes:
+            node["nextnode"] = {}
+        for i, edge in enumerate(self.edge.edges):
+            nodes[edge["node1"]]["nextnode"] = {**nodes[edge["node1"]]["nextnode"], edge["no"]:edge["node2"]}
+            nodes[edge["node2"]]["nextnode"] = {**nodes[edge["node2"]]["nextnode"], edge["no"]:edge["node1"]}
+
+
     def setNo(self):
         self.nodes = [ {**self.nodes[i] , **{"no": i}} for i in range(len(self.nodes))]
 

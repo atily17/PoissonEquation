@@ -85,7 +85,7 @@ if __name__ == "__main__":
     poisson.generateGrid(grid, method)
     t2 = time.time()
     print(t2 - t1)
-    poisson.plot("Grid")
+    #poisson.plot("Grid")
     
     print("solve")
     t1 = time.time()
