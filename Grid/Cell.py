@@ -137,7 +137,6 @@ class Triangle(Cell):
                     n2 = n1 + 2
 
         self.edge.setAllEdgeAdjacentCell()
-        self.print()
 
     def flipTriangle(self):
         nodes = self.node.nodes
@@ -166,9 +165,7 @@ class Triangle(Cell):
                 self._flip(edge)
 
     def _flip(self, edge):
-        print(edge["no"], "Flipping!")
         rect = self.getRectangle(edge)
-        print(rect)
         cell1 = self.cells[edge["cells"][0]]
         cell2 = self.cells[edge["cells"][1]]
 
@@ -178,7 +175,7 @@ class Triangle(Cell):
         cell1["nodes"] = [rect["nodes"][0],rect["nodes"][1],rect["nodes"][3]]
         cell2["nodes"] = [rect["nodes"][2],rect["nodes"][3],rect["nodes"][1]]
         cell1["edges"] = [rect["edges"][0],edge["no"], rect["edges"][3]]
-        cell2["edges"] = [rect["edges"][1],edge["no"], rect["edges"][2]]
+        cell2["edges"] = [rect["edges"][2],edge["no"], rect["edges"][1]]
 
 
     def getRectangle(self, edge):

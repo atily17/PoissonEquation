@@ -67,7 +67,7 @@ class MatrixGenerater(object):
 
 
     def Neumann(self, i, t):
-        # 境界のベクトル
+        # Vector of Border
         p1 = self.domain.vertexes[t]
         p2 = self.domain.vertexes[(t + 1) % self.domain.nVertexes]
         vec = (p2 - p1) / np.linalg.norm(p2 - p1, ord=2)
@@ -76,11 +76,11 @@ class MatrixGenerater(object):
         nextNode = self.nodes[i]["nextnode"]
         nextNodePoint = { k: np.array(self.nodes[v]["point"]) for k,v in nextNode.items() }
         nextNodeVec = { k: nextNodePoint[k] - self.nodes[i]["point"] for k,v in nextNode.items() }
-        # 内積と外積
+        # inner and cross product
         dot = { k: nextNodeVec[k][0] * normalVec[0] + nextNodeVec[k][1] * normalVec[1] for k,v in nextNode.items() }
         cross = { k: normalVec[0] * nextNodeVec[k][1] - normalVec[1] * nextNodeVec[k][0] for k,v in nextNode.items() }
 
-        # cornerのとき
+        # case of corner
         if self.nodes[i]["position"][0] == "c":
             p0 = self.domain.vertexes[int(self.nodes[i]["position"][1:])]
             p1 = self.domain.vertexes[(int(self.nodes[i]["position"][1:]) + 1) % self.domain.nVertexes]
@@ -102,7 +102,7 @@ class MatrixGenerater(object):
             self.matrix[i][backIndex] = ans[0]
             self.matrix[i][fwrdIndex] = ans[1]
 
-        # borderのとき
+        # case of border
         elif len(nextNode) > 2:
             p1 = nextNode["b"]
             x1 = nextNodeVec["b"]

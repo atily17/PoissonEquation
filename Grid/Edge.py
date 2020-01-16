@@ -195,4 +195,3 @@ class Cartesian(Edge):
             
         deleteIndex = set(deleteIndex)
         self.edges = [self.edges[i] for i in range(len(self.edges)) if i not in deleteIndex]
-        print(deleteIndex)

@@ -85,14 +85,15 @@ class Grid(object):
         self.node.setAllNextNodeFromEdge()
         self.node.setCellData()
 
-        self.node.print()
-        self.edge.print()
-        self.cell.print()
 
     def print(self, gridType = "all"):
         print("-----Grid-----")
         if gridType == "all" or gridType == "Node":
             self.node.print()
+        if gridType == "all" or gridType == "Edge":
+            self.edge.print()
+        if gridType == "all" or gridType == "Cell":
+            self.cell.print()
 
     def plot(self, sizeRate=10):
         size = np.array([self.problem.domain.right-self.problem.domain.left, self.problem.domain.up-self.problem.domain.down])
@@ -117,7 +118,6 @@ class Grid(object):
             elif self.problem.domain.bc["bc"][k]["bctype"] == "Neumann":
                 c = "r-"
 
-            print(e1, e2)
             plt.plot([self.problem.domain.vertexes[e1][0],self.problem.domain.vertexes[e2][0]],
                      [self.problem.domain.vertexes[e1][1],self.problem.domain.vertexes[e2][1]],
                      c, zorder = zz, lw=5)

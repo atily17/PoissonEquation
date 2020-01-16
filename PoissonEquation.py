@@ -27,7 +27,7 @@ class PoissonEquation:
 
     def result(self):
         self.result = Result.Result(self.solution, self.grid, self.problem)
-        self.result.calcFluxDensity()
+        #self.result.calcFluxDensity()
 
     def plot(self, plotType = "all"):
         if plotType == "all" or plotType == "Domain":
@@ -63,7 +63,7 @@ if __name__ == "__main__":
 
     grid = {"node":{
                 "type":"Cartesian",
-                "div":[10,10]
+                "div":[100,100]
                 }, 
             "edge":{
                 "type":"NotCross"
@@ -93,8 +93,8 @@ if __name__ == "__main__":
     t2 = time.time()
     print(t2 - t1)
 
-    #poisson.result()
-    #poisson.plot("Potential")
+    poisson.result()
+    poisson.plot("Potential")
     #poisson.plot("FluxDensity")
 
     ##poisson.print()

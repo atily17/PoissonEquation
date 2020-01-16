@@ -14,25 +14,23 @@ class MatrixGenerater(object):
     def _case2ndAcuracy(self):
         self.matrix = np.zeros((len(self.nodes), len(self.nodes)))
         for i, node in enumerate(self.nodes):
-            if node["position"][0] != "in":
+            if node["position"] != "in":
                 self.setMatrixOnBorder(node)
+                continue
             nextnodes = list(node["nextnode"].values())
             nextnodes = [self.nodes[nextnode] for nextnode in nextnodes]
             nextnodes = nextnodes + [node]
             diffsi = self.getBasisFunction(node)
-            print(diffsi)
             for nextnode in nextnodes:
                 j = nextnode["no"]
                 nextcells = [self.cells[nodecell] for nodecell in nextnode["cells"] if nodecell in node["cells"]]
                 diffsj = self.getBasisFunction(nextnode, nextcells)
-                print(diffsj)
 
                 for k in diffsj.keys():
-                    diff = diffsi[k]["x"] * diffsj[k]["x"] + diffsi[k]["y"] * diffsi[k]["y"] * diffsj[k]["y"]
-                    self.matrix[i,j] += diff
+                    diff = diffsi[k]["diff"][0] * diffsj[k]["diff"][0] + diffsi[k]["diff"][1] * diffsj[k]["diff"][1]
+                    self.matrix[i,j] -= diff/diffsj[k]["area"]
 
-        print(self.matrix)
-
+        return self.matrix
 
     def getBasisFunction(self, node, cell = None):
         if cell is None:
@@ -41,16 +39,22 @@ class MatrixGenerater(object):
             cells = cell
         diffs = {}
         for cell in cells:
-            cellnodes = [self.nodes[cellnode] for cellnode in cell["nodes"] if cellnode != node["no"]]
+            cellnodesno = cell["nodes"][:]
+            while (cellnodesno[2] != node["no"]):
+                f0 = cellnodesno[0]
+                cellnodesno.remove(f0)
+                cellnodesno.append(f0)
+            cellnodes = [self.nodes[cellnode] for cellnode in cellnodesno[:2]]
             area = cell["area"]
             diffx = cellnodes[0]["point"][1] - cellnodes[1]["point"][1]
             diffy = cellnodes[1]["point"][0] - cellnodes[0]["point"][0]
-            diffs = {**diffs, cell["no"]: {"x":diffx/area, "y":diffy/area}}
-
+            diffs = {**diffs, cell["no"]: {"area":area,"diff":[diffx, diffy]}}
         return diffs
 
+
+
     def setMatrixOnBorder(self, node):
-        i = node["i"]
+        i = node["no"]
         assert (node["position"][0] == "b" or node["position"][0] == "c"), node["position"]
         if node["position"][0] == "b":
             t = int(node["position"][1])
@@ -74,10 +78,29 @@ class MatrixGenerater(object):
         elif bctype == "Dirichlet":
             self.setDirichlet(node)
 
-    def setDirichlet(node):
+    def setDirichlet(self, node):
         i = node["no"]
         self.matrix[i][i] = 1
 
-    def setNeumann(node, t):
+    def setNeumann(self, node, t):
         i = node["no"]
-        #TODO:
+        # Vector of Border
+
+        diffsi = self.getBasisFunction(node)
+
+        nextnodes = list(node["nextnode"].values())
+        nextnodes = [self.nodes[nextnode] for nextnode in nextnodes]
+        nextnodes = nextnodes + [node]
+
+        for nextnode in nextnodes:
+            j = nextnode["no"]
+            nextcells = [self.cells[nodecell] for nodecell in nextnode["cells"] if nodecell in node["cells"]]
+            diffsj = self.getBasisFunction(nextnode, nextcells)
+
+            for k in diffsj.keys():
+                diff = diffsi[k]["diff"][0] * diffsj[k]["diff"][0] + diffsi[k]["diff"][1] * diffsj[k]["diff"][1]
+                self.matrix[i,j] -= diff/self.cells[k]["area"]
+
+        nextnodes = [self.nodes[nextnode] for k, nextnode in node["nextnode"].items() if self.edges[k]["position"] != "in"]
+        bedges = [self.edges[nodeedge] for nodeedge in node["edges"] if self.edges[nodeedge]["position"] != "in"]
+        bordercells = [self.cells[bedge["cells"][0]] for bedge in bedges]

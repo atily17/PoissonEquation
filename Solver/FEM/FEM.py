@@ -8,7 +8,7 @@ class FEM(object):
 
     def solve(self, problem, grid):
         matrix = MatrixGenerater.MatrixGenerater().generate(problem, grid,"CartesianGrid")
-        #vector = VectorGenerater.VectorGenerater().generate(problem, grid)
+        vector = VectorGenerater.VectorGenerater().generate(problem, grid)
 
 
         #for i in range(len(vector)):
@@ -16,7 +16,7 @@ class FEM(object):
         #x = matrix != 0
         #for i in range(len(matrix)):
         #    print(matrix[i])
-        #    print(x[i])
+        #    #print(x[i])
 
 
-        #return np.linalg.solve(matrix, vector)
+        return np.linalg.solve(matrix, vector)
