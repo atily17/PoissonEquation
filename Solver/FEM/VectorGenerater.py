@@ -4,11 +4,16 @@ class VectorGenerater(object):
     def generate(self, problem, grid):
         self.nodes = grid.node.nodes
         self.edges = grid.edge.edges
+        self.cell = grid.cell
+        self.cells = grid.cell.cells
         nodes = grid.node.nodes
         self.vector = np.zeros(len(nodes))
         for i in range(len(nodes)):
             if nodes[i]["position"][0] == "i":
-                self.vector[i] = problem.source.source(nodes[i]["point"])
+                cells = nodes[i]["cells"]
+                for cellno in cells:
+                    cell = self.cells[cellno]
+                    self.vector[i] += problem.source.source(self.cell.getCenter(cell)) * cell["area"]
             elif "b" in nodes[i]["position"][0]:
                 if problem.domain.bc["bc"][int(nodes[i]["position"][1:])]["bctype"] == "Neumann":
                     bc = problem.domain.bc["bc"][int(nodes[i]["position"][1:])]

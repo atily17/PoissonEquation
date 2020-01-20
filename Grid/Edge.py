@@ -1,27 +1,29 @@
 import numpy as np
 
 class Edge(object):
-    def __init__(self, domain, node = None):
+    def __init__(self, domain, node=None):
         self.domain = domain
         if node is not None:
             self.node = node
+            self.eps = self.node.eps
         self.edges = []
         self.cell = None
 
     def setNo(self):
         self.edges = [ {**self.edges[i] , **{"no": i}} for i in range(len(self.edges))]
 
-    def setEdgeAdjacentCell(self, edge = None):
+    def setEdgeAdjacentCell(self, edge=None):
         if edge is None:
             self.setAllEdgeDataNode()
             return
-        nodes = self.node.nodes
-        for node in nodes:
-            node["edges"] = []
-        if type(edge) == int:
-            edge = self.edges[edge]
-
         cells = self.cell.cells
+        edge = self.edges[edge]
+        edge["cells"] = []
+        for i,cell in enumerate(cells):
+            if edge["no"] not in cell["edges"]:
+                continue
+            edge["cells"].append(i)
+        self._test_setEdgeDataCell()
 
     def setAllEdgeAdjacentCell(self):
         edges = self.edges
@@ -33,13 +35,55 @@ class Edge(object):
                 edges[edge]["cells"].append(i)
         self._test_setEdgeDataCell()
 
+    def setPosition(self, edge= None):
+        nodes = self.node.nodes
+        pos1 = nodes[edge["node1"]]["position"]
+        pos2 = nodes[edge["node2"]]["position"]
+        if pos1 == "in" or pos2 == "in":
+            b1 = "in"
+        elif pos1[0] == "b" and pos2[0] == "b":
+            if pos1 == pos1:
+                b1 = pos1[:]
+            else:
+                b1 = "in"
+        elif pos1[0] == "c" and pos2[0] == "c":
+            pos1no = int(pos1[1:])
+            pos2no = int(pos2[1:])
+            if (pos1no + 1) % self.domain.nVertexes == pos2no:
+                b1 = "b" + pos1[1:]
+            elif (pos1no - 1) % self.domain.nVertexes == pos2no:
+                b1 = "b" + pos2[1:]
+            else:
+                b1 = "in"
+        elif pos1[0] == "c" and pos2[0] == "b":
+            pos1no = int(pos1[1:])
+            pos2no = int(pos2[1:])
+            if pos1no == pos2no:
+                b1 = "b" + pos1[1:]
+            elif (pos1no - 1) % self.domain.nVertexes == pos2no:
+                b1 = "b" + pos2[1:]
+            else:
+                b1 = "in"
+        elif pos1[0] == "b" and pos2[0] == "c":
+            pos1no = int(pos2[1:])
+            pos2no = int(pos1[1:])
+            if pos1no == pos2no:
+                b1 = "b" + pos1[1:]
+            elif (pos1no - 1) % self.domain.nVertexes == pos2no:
+                b1 = "b" + pos2[1:]
+            else:
+                b1 = "in"            
+
+
+
+
     def setEdgeLength(self, edge):
         if type(edge) == int:
             edge = self.edges[edge]
         nodes = self.node.nodes
-        edge["length"] = np.linalg.norm(nodes[edge["node2"]]["point"] - nodes[edge["node1"]]["point"] )
+        edge["length"] = np.linalg.norm(nodes[edge["node2"]]["point"] - nodes[edge["node1"]]["point"])
 
-    def getNextEdges(self, edge_index, node_no = None):
+    def getNextEdges(self, edge_index, node_no=None):
         nodes = self.node.nodes
         if node_no != "node2":
             node1 = self.edges[edge_index]["node1"]
@@ -55,7 +99,7 @@ class Edge(object):
             return edges2
         return edges1, edges2
     
-    def getMinAngleEdge(self, edge_index, a_node = "node2"):
+    def getMinAngleEdge(self, edge_index, a_node="node2"):
         nodes = self.node.nodes
         if a_node == "node2":
             e_node = "node1"
@@ -83,12 +127,55 @@ class Edge(object):
         vec1 = vector1 / np.linalg.norm(vector1)
         nn = np.linalg.norm(vector2 , axis = 1)
         vec2 = (vector2.T / np.linalg.norm(vector2 , axis = 1)).T
-        cross = vec1[0]*vec2[:,1] - vec1[1]*vec2[:,0]
-        dot = vec1[0]*vec2[:,0] + vec1[1]* vec2[:,1]
+        cross = vec1[0] * vec2[:,1] - vec1[1] * vec2[:,0]
+        dot = vec1[0] * vec2[:,0] + vec1[1] * vec2[:,1]
         dot[cross < 0] += 1
         dot[(cross == 0) & (dot < 0)] = 0
         dot[cross > 0] = dot[cross > 0] * (-1) - 1
         return dot
+
+    def getIsOuter(self, edge):
+        nodes = self.node.nodes
+        if nodes[edge["node1"]]["position"][0] == "c" and nodes[edge["node2"]]["position"][0] == "c":
+            return False
+        elif nodes[edge["node1"]]["position"][0] == "b" or nodes[edge["node2"]]["position"][0] == "b":
+            b1 = False
+            b2 = False
+            if nodes[edge["node1"]]["position"][0] == "b":
+                p1 = nodes[edge["node1"]]["point"]
+                p2 = nodes[edge["node2"]]["point"]
+                vec1 = p2 - p1
+                vertex1 = int(nodes[edge["node1"]]["position"][1:])
+                vertex2 = (vertex1 + 1)%self.domain.nVertexes
+                v1 = self.domain.vertexes[vertex1]
+                v2 = self.domain.vertexes[vertex2]
+                vec2 = v2 - v1
+                b1 = (vec1[0] * vec2[1] - vec1[1] * vec2[0] >= 0)
+            if nodes[edge["node2"]]["position"][0] == "b":
+                p1 = nodes[edge["node2"]]["point"]
+                p2 = nodes[edge["node1"]]["point"]
+                vec1 = p2 - p1
+                vertex1 = int(nodes[edge["node2"]]["position"][1:])
+                vertex2 = (vertex1 + 1)%self.domain.nVertexes
+                v1 = self.domain.vertexes[vertex1]
+                v2 = self.domain.vertexes[vertex2]
+                vec2 = v2 - v1
+                b2 = (vec1[0] * vec2[1] - vec1[1] * vec2[0] >= 0)
+            b = b1 | b2
+            return b
+
+        
+        n1 = nodes[edge["node1"]]
+        n2 = nodes[edge["node2"]]
+        p1 = n1["point"]
+        p2 = n2["point"]
+
+        vertexes = self.domain.vertexes
+        vertexes1 = np.array(vertexes)
+        vertexes2 = np.array(list(vertexes[1:]) + list(vertexes[:1]))
+        check = self._checkCross(p1, p2, vertexes1, vertexes2)
+
+        return np.any(check)
 
     def _test_setEdgeDataCell(self):
         edges = self.edges
@@ -125,9 +212,10 @@ class Cartesian(Edge):
                             for i in range(len(nodes)) if "f" in nodes[i]["nextnode"]])
         self.edges.extend([{"node1":i, "node2": nodes[i]["nextnode"]["r"], "position": "in"} for i in range(len(nodes)) if "r" in nodes[i]["nextnode"]])
         self.edges.extend([{"node1":i, "node2": nodes[i]["nextnode"]["u"], "position": "in"} for i in range(len(nodes)) if "u" in nodes[i]["nextnode"]])
-        self.edges = [ dict(edge.items() | {"length": np.linalg.norm(nodes[edge["node2"]]["point"] - nodes[edge["node1"]]["point"] )}.items())
+        self.edges = [ dict(edge.items() | {"length": np.linalg.norm(nodes[edge["node2"]]["point"] - nodes[edge["node1"]]["point"])}.items())
                      for edge in self.edges]
-        self._deleteCross()
+        self.deleteCross()
+        self.deleteOuter()
         self.sort()
         self.node.edge = self
         self.node.setEdgeDataNode()
@@ -137,22 +225,46 @@ class Cartesian(Edge):
 
     def _appendPosition(self):
         nodes = self.node.nodes
-        pss1  = [nodes[edge["node1"]]["position"] for edge in self.edges]
-        pss2  = [nodes[edge["node2"]]["position"] for edge in self.edges]
+        pss1 = [nodes[edge["node1"]]["position"] for edge in self.edges]
+        pss2 = [nodes[edge["node2"]]["position"] for edge in self.edges]
 
         self.edges = [dict(edge.items() | {"position" : "in"}.items())
-                        for i,edge in enumerate(self.edges )
+                        for i,edge in enumerate(self.edges)
                      ]
         postype1 = [ps[0] for ps in pss1]
         postype2 = [ps[0] for ps in pss2]
-        posno1   = [ps[1:] for ps in pss1]
-        posno2   = [ps[1:] for ps in pss2]
+        posno1 = [ps[1:] for ps in pss1]
+        posno2 = [ps[1:] for ps in pss2]
         for i,edge in enumerate(self.edges):
             if pss1[i] != "in" and pss2[i] != "in":
                 p = nodes[edge["node1"]]["nextnode"]["f"]
 
 
-    def _deleteCross(self, deleteMode = "min"):
+    def deleteOuter(self):
+        nodes = self.node.nodes
+        deleteIndex = []
+        continueIndex = []
+        for i,edge in enumerate(self.edges):
+            if nodes[edge["node1"]]["position"] != "in" or nodes[edge["node2"]]["position"] != "in":
+                continue
+
+            n1 = nodes[edge["node1"]]
+            n2 = nodes[edge["node2"]]
+            p1 = n1["point"]
+            p2 = n2["point"]
+
+            vertexes = self.domain.vertexes
+            vertexes1 = np.array(vertexes)
+            vertexes2 = np.array(list(vertexes[1:]) + list(vertexes[:1]))
+            check = self._checkCross(p1, p2, vertexes1, vertexes2)
+            if np.any(check) == False:
+                continue
+            deleteIndex.append(i)
+            
+        deleteIndex = set(deleteIndex)
+        self.edges = [self.edges[i] for i in range(len(self.edges)) if i not in deleteIndex]
+
+    def deleteCross(self, deleteMode="min"):
         nodes = self.node.nodes
         ids1 = np.array([self.edges[i]["node1"] for i in range(len(self.edges))])
         ids2 = np.array([self.edges[i]["node2"] for i in range(len(self.edges))])
@@ -182,7 +294,7 @@ class Cartesian(Edge):
             check3 = (edge["node2"] != ids1)
             check4 = (edge["node1"] != ids2)
             check5 = (edge["node2"] != ids2)
-            check  = check1 & check2 & check3 & check4 & check5
+            check = check1 & check2 & check3 & check4 & check5
             if np.any(check) == False:
                 continue
             crossIndices = np.append(np.where(check)[0], i)

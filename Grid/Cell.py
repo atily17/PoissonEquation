@@ -1,12 +1,15 @@
 import copy
 import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.collections as mcl
 
 class Cell(object):
     def __init__(self, node, edge):
+        self.domain = node.domain
         self.node = node
         self.edge = edge
         self.cells = []
-        self.eps = self.node.eps[0]**2 * self.node.eps[1]**2
+        self.eps = self.node.eps[0] * self.node.eps[1]
         self.node.cell = self
 
     def generateCell(self):
@@ -80,9 +83,15 @@ class Cell(object):
         if ~np.all(bools):
             return False
         
+
         edges = self.edge.edges
         tempedge = {"node1":nodeNo1, "node2":nodeNo2, "no":len(edges), "position":"in"}
+
+        if self.edge.getIsOuter(tempedge):
+            return False
+
         self.edge.setEdgeLength(tempedge)
+        self.edge.setPosition(tempedge)
         edges.append(tempedge)
         self.node.setEdgeDataNode(edges[-1])
         if diagonalNo1 < diagonalNo2:
@@ -114,6 +123,47 @@ class Cell(object):
         for i in range(len(self.cells)):
             print(self.cells[i])
 
+    def plot(self, size):
+        fig=plt.figure(figsize=size)
+        plt.xlim(self.domain.left,self.domain.right)
+        plt.ylim(self.domain.down,self.domain.up)
+        ax =fig.add_subplot(1,1,1)
+        
+        # Domain
+        domain = plt.Polygon(self.domain.vertexes, zorder=1, fc = "#DDDDFF")
+        ax.add_patch(domain)
+        zz =  10+self.domain.nVertexes
+        for k in self.domain.bc["priority"]:
+            e1 = k
+            e2 = (k + 1) % self.domain.nVertexes
+
+            if self.domain.bc["bc"][k]["bctype"] == "Dirichlet":
+                c = "b-"
+            elif self.domain.bc["bc"][k]["bctype"] == "Neumann":
+                c = "r-"
+
+            plt.plot([self.domain.vertexes[e1][0],self.domain.vertexes[e2][0]],
+                     [self.domain.vertexes[e1][1],self.domain.vertexes[e2][1]],
+                     c, zorder = zz, lw=5)
+            zz -= 1
+        # Cell
+        cells = self.cells
+        nodes = self.node.nodes
+        polygonsNo = [cell["nodes"] for cell in cells]
+        polygons = []
+        polygonPlt = []
+        for polygonNo in polygonsNo:
+            polygons.append(np.array([nodes[no]["point"] for no in polygonNo]))
+            polygonPlt.append(plt.Polygon(polygons[-1], zorder=100, fc = "#DDDDCC", ec = "#000000"))
+            ax.add_patch(polygonPlt[-1])
+
+        #polys=mcl.PolyCollection(polygons)
+        #ax.add_collection(polys) #, colors="k", zorder=100)
+
+        plt.show()
+
+
+
 class Triangle(Cell):
     def __init__(self, node, edge):
         super().__init__(node, edge)
@@ -136,6 +186,7 @@ class Triangle(Cell):
                     n1 += 1
                     n2 = n1 + 2
 
+        self.getNo()
         self.edge.setAllEdgeAdjacentCell()
 
     def flipTriangle(self):
@@ -171,12 +222,23 @@ class Triangle(Cell):
 
         edge["node1"] = rect["nodes"][1]
         edge["node2"] = rect["nodes"][3]
+        self.edge.setPosition(edge)
 
         cell1["nodes"] = [rect["nodes"][0],rect["nodes"][1],rect["nodes"][3]]
         cell2["nodes"] = [rect["nodes"][2],rect["nodes"][3],rect["nodes"][1]]
         cell1["edges"] = [rect["edges"][0],edge["no"], rect["edges"][3]]
         cell2["edges"] = [rect["edges"][2],edge["no"], rect["edges"][1]]
-
+        for rectedge in rect["edges"]:
+            self.edge.setEdgeAdjacentCell(rectedge)
+            #self.grid.plot("cell")
+    def getCenter(self, cell):
+        if type(cell) == int:
+            cell = self.cells[i]
+        nodes = cell["nodes"]
+        center = np.array([0,0])
+        for no in nodes:
+            center = center + self.node.nodes[no]["point"]
+        return center/3
 
     def getRectangle(self, edge):
         cell1 = copy.deepcopy(self.cells[edge["cells"][0]])

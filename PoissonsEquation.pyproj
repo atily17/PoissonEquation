@@ -60,6 +60,9 @@
     <Compile Include="Solver\FDM\MatrixGenerater.py" />
     <Compile Include="Solver\FDM\VectorGenerater.py" />
     <Compile Include="Solver\FDM\__init__.py" />
+    <Compile Include="Solver\FEM\PhysicalQuantitySolver.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Solver\FEM\FEM.py" />
     <Compile Include="Solver\FEM\MatrixGenerater.py" />
     <Compile Include="Solver\FEM\VectorGenerater.py" />

@@ -27,8 +27,7 @@ class Grid(object):
             self.node.sort()
             self.node.setNextNo()
 
-    def setEdge(self, **edge):
-        self.edgeType = edge["type"]
+    def setEdge(self):
         if self.edgeType == "Cartesian":
             assert self.nodeType == "Cartesian", "if edge type is 'Cartesian', grid['type'] must be 'Cartesian'"
             self.edge = Edge.Cartesian(self.node)
@@ -54,10 +53,7 @@ class Grid(object):
 
     def _setNodeCaseFEM(self, **grid):
         node = grid["node"]
-        edge = grid["edge"]
-        cell = grid["cell"]
         self.nodeType = node["type"]
-        self.edgeType = edge["type"]
         if self.nodeType =="Cartesian":
             if "eps" in node:
                 self.node=Node.Cartesian(self.problem.domain, node["div"], node["eps"])
@@ -70,16 +66,15 @@ class Grid(object):
             self.node.setNextNo()
             self.node.setNo()
 
-        if self.edgeType == "NotCross":
-            self.edge = Edge.Cartesian(self.problem.domain, self.node)
-            self.edge.setNo()
-        
+        self.edge = Edge.Cartesian(self.problem.domain, self.node)
+        self.edge.setNo()
         self.cell = Cell.Triangle(self.node, self.edge)
+        self.cell.grid = self
         self.edge.cell = self.cell
         self.cell.generateCell()
         self.cell.splitTriangle()
+        self.plot("cell")
         self.cell.flipTriangle()
-        self.cell.getNo()
         self.cell.getArea()
 
         self.node.setAllNextNodeFromEdge()
@@ -95,10 +90,13 @@ class Grid(object):
         if gridType == "all" or gridType == "Cell":
             self.cell.print()
 
-    def plot(self, sizeRate=10):
+    def plot(self, type = "all", sizeRate=10):
         size = np.array([self.problem.domain.right-self.problem.domain.left, self.problem.domain.up-self.problem.domain.down])
         size_normalize=size[0]+size[1]
         size = size/size_normalize * sizeRate
+        if type == "cell":
+            self.cell.plot(size)
+            return
 
         fig=plt.figure(figsize=size)
         plt.xlim(self.problem.domain.left,self.problem.domain.right)

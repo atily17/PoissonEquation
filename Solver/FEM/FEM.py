@@ -9,8 +9,9 @@ class FEM(object):
     def solve(self, problem, grid):
         matrix = MatrixGenerater.MatrixGenerater().generate(problem, grid,"CartesianGrid")
         vector = VectorGenerater.VectorGenerater().generate(problem, grid)
+        potential = np.linalg.solve(matrix, vector)
 
-
+        flux = 
         #for i in range(len(vector)):
         #    print(vector[i])
         #x = matrix != 0
@@ -19,4 +20,4 @@ class FEM(object):
         #    #print(x[i])
 
 
-        return np.linalg.solve(matrix, vector)
+        return potential

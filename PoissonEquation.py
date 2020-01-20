@@ -56,18 +56,15 @@ class PoissonEquation:
 
 
 if __name__ == "__main__":
-    filename = "./Example/Problem1.json"
+    filename = "./Example/Problem4.json"
     problem = IOData.InputData().readProblemData(filename)
 
     #problem["source"] = lambda x: (-10 if ((-0.2 < x[0] < 0.2) and (-0.2 < x[1] < 0.2)) else 0)
 
     grid = {"node":{
                 "type":"Cartesian",
-                "div":[100,100]
+                "div":[50,50]
                 }, 
-            "edge":{
-                "type":"NotCross"
-                },
             "cell":{
                 "type":"Triangle"
                 }
@@ -95,7 +92,7 @@ if __name__ == "__main__":
 
     poisson.result()
     poisson.plot("Potential")
-    #poisson.plot("FluxDensity")
+    poisson.plot("FluxDensity")
 
     ##poisson.print()
     #filename = "./potential.json"

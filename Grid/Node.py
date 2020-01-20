@@ -84,7 +84,7 @@ class Node(object):
         assert(np.all(np.array(debug) == 2))
 
 class Cartesian(Node):
-    def __init__(self, domain, div, epsilon=3, ebs=2):
+    def __init__(self, domain, div, epsilon=2, ebs=3):
         super().__init__(domain)
         if isinstance(div[0], (int)):
             self.nDivX = div[0]
@@ -195,9 +195,13 @@ class Cartesian(Node):
         for x in ptX:
            x_index = np.where(np.isclose(pt[:,0], x))[0]
            for x_index_i in range(len(x_index)):
-               if (x_index_i != 0 and ((self.nodes[x_index[x_index_i]]["position"] == "in" or self.nodes[x_index[x_index_i - 1]]["position"] == "in") or self.domain.isNextNodeNearBorder(self.nodes[x_index[x_index_i]], self.nodes[x_index[x_index_i - 1]], self.ebs))):
+               if (x_index_i != 0 and 
+                   ((self.nodes[x_index[x_index_i]]["position"] == "in" or self.nodes[x_index[x_index_i - 1]]["position"] == "in") or 
+                    self.domain.isNextNodeNearBorder(self.nodes[x_index[x_index_i]], self.nodes[x_index[x_index_i - 1]], self.ebs))):
                    self.nodes[x_index[x_index_i]]["nextnode"]["d"] = x_index[x_index_i - 1]
-               if ((x_index_i != len(x_index) - 1) and ((self.nodes[x_index[x_index_i]]["position"] == "in" or self.nodes[x_index[x_index_i + 1]]["position"] == "in") or self.domain.isNextNodeNearBorder(self.nodes[x_index[x_index_i]], self.nodes[x_index[x_index_i + 1]], self.ebs))):
+               if ((x_index_i != len(x_index) - 1) and 
+                   ((self.nodes[x_index[x_index_i]]["position"] == "in" or self.nodes[x_index[x_index_i + 1]]["position"] == "in") or 
+                    self.domain.isNextNodeNearBorder(self.nodes[x_index[x_index_i]], self.nodes[x_index[x_index_i + 1]], self.ebs))):
                    self.nodes[x_index[x_index_i]]["nextnode"]["u"] = x_index[x_index_i + 1]
 
         ptY = np.round(np.array([node["point"][1] for node in self.nodes]), 8)
@@ -205,9 +209,14 @@ class Cartesian(Node):
         for y in ptY:
            y_index = np.where(np.isclose(pt[:,1], y))[0]
            for y_index_i in range(len(y_index)):
-               if ((y_index_i != 0) and ((self.nodes[y_index[y_index_i]]["position"] == "in" or self.nodes[y_index[y_index_i - 1]]["position"] == "in") or self.domain.isNextNodeNearBorder(self.nodes[y_index[y_index_i]], self.nodes[y_index[y_index_i - 1]], self.ebs))):
+               if ((y_index_i != 0) and 
+                   ((self.nodes[y_index[y_index_i]]["position"] == "in" or self.nodes[y_index[y_index_i - 1]]["position"] == "in") 
+                    or self.domain.isNextNodeNearBorder(self.nodes[y_index[y_index_i]], self.nodes[y_index[y_index_i - 1]], self.ebs))):
                    self.nodes[y_index[y_index_i]]["nextnode"]["l"] = y_index[y_index_i - 1]
-               if ((y_index_i != len(y_index) - 1) and ((self.nodes[y_index[y_index_i]]["position"] == "in" or self.nodes[y_index[y_index_i + 1]]["position"] == "in") or self.domain.isNextNodeNearBorder(self.nodes[y_index[y_index_i]], self.nodes[y_index[y_index_i + 1]], self.ebs))):
+               if ((y_index_i != len(y_index) - 1) and 
+                   ((self.nodes[y_index[y_index_i]]["position"] == "in" or self.nodes[y_index[y_index_i + 1]]["position"] == "in") 
+                    or self.domain.isNextNodeNearBorder(self.nodes[y_index[y_index_i]], self.nodes[y_index[y_index_i + 1]], self.ebs))
+                   ):
                    self.nodes[y_index[y_index_i]]["nextnode"]["r"] = y_index[y_index_i + 1]
          
     def print(self):
