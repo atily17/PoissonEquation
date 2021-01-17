@@ -10,8 +10,8 @@ In future, It will be able to use Finite Element Method (FEM), Boundary Element 
 
 # Specification
 
-You can use this program by setting a question.
-To set the question, you can refer to json file in `Example` directory like following.
+You can use this program by setting a problem.
+To set the problem, you can refer to json file in `Example` directory like following.
 
 ```json:Problem1
 {
